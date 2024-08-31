@@ -8,7 +8,7 @@ import { EventsListItemView } from '../view/events-list-view/events-list-item-vi
 import { EditEventFormView } from '../view/events/edit-event-form-view';
 import { RenderPosition } from '../render';
 import View from '../shared/view';
-import EventInfoView from '../view/events/event-info-view/event-info-view';
+import { EventInfoView } from '../view/events/event-info-view';
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
