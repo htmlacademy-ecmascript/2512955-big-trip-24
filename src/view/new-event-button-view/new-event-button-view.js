@@ -3,6 +3,8 @@ import { getNewEventButtonTemplate } from './template';
 
 export default class NewEventButtonView extends View {
   constructor() {
-    super(getNewEventButtonTemplate);
+    super({
+      getElementTemplate: getNewEventButtonTemplate
+    });
   }
 }

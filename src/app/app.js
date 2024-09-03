@@ -1,8 +1,10 @@
-import ApplicationPresenter from '../presenter/ApplicationPresenter';
+import RootPresenter from '../presenter/root-presenter';
+import { getDataService } from '../service/data-service';
 
 export default class Application {
   static start() {
-    const applicationPresenter = new ApplicationPresenter();
+    const dataService = getDataService();
+    const applicationPresenter = new RootPresenter({ dataService });
     applicationPresenter.init();
   }
 }

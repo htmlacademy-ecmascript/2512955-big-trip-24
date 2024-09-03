@@ -7,14 +7,23 @@ import {
 export default class View {
   #element = null;
   #getElementTemplate = null;
+  #data = null;
 
-  constructor(getElementTemplate) {
+  constructor({
+    getElementTemplate,
+    data
+  }) {
     this.#getElementTemplate = getElementTemplate;
+    this.#data = data;
+  }
+
+  #getFilledTemplate() {
+    return this.#getElementTemplate({data: this.#data});
   }
 
   getElement() {
     if (!this.#element) {
-      this.#element = createElement(this.#getElementTemplate());
+      this.#element = createElement(this.#getFilledTemplate());
     }
 
     return this.#element;
