@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { getTimePartsByMinutes } from '../../../utills/time';
 import { DateFormats } from '../../../config/date-format';
 
-const getEventLengthString = ({days, hours, minutes}) => {
+const getEventLengthString = ({ days, hours, minutes }) => {
   let result = '';
 
   const concatTimePart = (value, unit) => {
@@ -27,7 +27,7 @@ const getEventSheduleTemplate = ({ eventBegin, eventEnd }) => {
         &mdash;
         <time class="event__end-time" datetime="${ eventEnd.format(DateFormats.DATETIME_FORMAT) }">${ eventEnd.format(DateFormats.TIME_FORMAT) }</time>
       </p>
-      <p class="event__duration">${getEventLengthString(eventLength)}</p>
+      <p class="event__duration">${ getEventLengthString(eventLength) }</p>
     </div>
   `;
 };

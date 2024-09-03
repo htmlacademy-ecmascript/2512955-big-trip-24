@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { RoutePointsTypes } from '../../config/route-points-types';
 
-export const newRoutePointDto = {
+export const NEW_ROUTE_POINT_DTO = {
   id: null,
   base_price: 0,
   date_to: null,

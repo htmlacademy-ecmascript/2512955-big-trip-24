@@ -1,7 +1,7 @@
 import RouteModel from '../../model/route-model';
 import OfferModel from '../../model/offer-model';
 import RouteDestinationModel from '../../model/route-destination-model';
-import { newRoutePointDto } from './defaults';
+import { NEW_ROUTE_POINT_DTO } from './defaults';
 
 export default class DataService {
   #offerModel = new OfferModel();
@@ -33,7 +33,7 @@ export default class DataService {
   }
 
   getNewRoutePointDto() {
-    return structuredClone(newRoutePointDto);
+    return structuredClone(NEW_ROUTE_POINT_DTO);
   }
 
   getRouteDto() {

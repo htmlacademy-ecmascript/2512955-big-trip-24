@@ -18,7 +18,7 @@ const getEventTypeFieldSetTemplate = (selectedType, eventId) => {
   return `
     <fieldset class="event__type-group">
       <legend class="visually-hidden">Event type</legend>
-      ${allPointsTypes.map(renderPointType).join('')}
+      ${ allPointsTypes.map(renderPointType).join('') }
     </fielset>
   `;
 };
@@ -27,7 +27,7 @@ const getDestinationSelectTemplate = (allDestinations, eventId) => {
   const renderDestinationOption = (option) => `<option value="${ option.name }"></option>`;
 
   return allDestinations?.length
-    ? `<datalist id="destination-list-${eventId}">
+    ? `<datalist id="destination-list-${ eventId }">
         ${allDestinations.map(renderDestinationOption).join('')}
       </datalist>`
     : '';
@@ -107,6 +107,14 @@ export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
   const allDestinations = getDestinations();
   const cancelButtonDescription = id ? 'Delete' : 'Cancel';
 
+  const destinationTemplate = destination
+    ? `<section class="event__section  event__section--destination">
+        <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+        <p class="event__destination-description">${ destination?.description ?? '' }</p>
+        ${ getEventPhotosTemplate(destination?.pictures) }
+          </section>`
+    : '';
+
   return `
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -124,28 +132,24 @@ export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-${ id }">
-            ${ type }
+            ${type}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-${ id }" type="text" name="event-destination" value="${ destination?.name ?? '' }" list="destination-list-${ id }">
-          ${ getDestinationSelectTemplate(allDestinations, id) }
+          ${getDestinationSelectTemplate(allDestinations, id)}
         </div>
 
         ${ getPointTimeLineTemplate({ id, dateBegin, dateEnd }) }
         ${ getEventPriceInputTemplate({ id, price }) }
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${ cancelButtonDescription }</button>
+        <button class="event__reset-btn" type="reset">${cancelButtonDescription}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
       </header>
       <section class="event__details">
         ${ getEventOffersTemplate(offers, fullOffersByEventType, id) }
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${ destination?.description ?? '' }</p>
-          ${ getEventPhotosTemplate(destination?.pictures) }
-        </section>
+        ${ destinationTemplate }
       </section>
     </form>
   `;
