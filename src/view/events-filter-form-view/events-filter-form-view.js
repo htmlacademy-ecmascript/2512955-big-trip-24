@@ -3,6 +3,8 @@ import View from '../../shared/view';
 
 export default class EventsFilterFormView extends View {
   constructor() {
-    super(getFiltersFormTemplate);
+    super({
+      getElementTemplate: getFiltersFormTemplate
+    });
   }
 }

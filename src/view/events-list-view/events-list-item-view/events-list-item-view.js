@@ -3,6 +3,8 @@ import { getListItemTemplate } from './template';
 
 export default class EventsListItemView extends View {
   constructor() {
-    super(getListItemTemplate);
+    super({
+      getElementTemplate: getListItemTemplate
+    });
   }
 }

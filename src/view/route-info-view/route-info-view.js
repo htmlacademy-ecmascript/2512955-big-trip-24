@@ -3,6 +3,8 @@ import { getRouteInfoViewTemplate } from './template';
 
 export default class RouteInfoView extends View {
   constructor() {
-    super(getRouteInfoViewTemplate);
+    super({
+      getElementTemplate: getRouteInfoViewTemplate
+    });
   }
 }
