@@ -3,11 +3,18 @@ import OfferModel from '../../model/offer-model';
 import RouteDestinationModel from '../../model/route-destination-model';
 import { NEW_ROUTE_POINT_DTO } from './defaults';
 
+/**
+ * DataService class
+ * @class DataService
+ */
 export default class DataService {
   #offerModel = new OfferModel();
   #destinationModel = new RouteDestinationModel();
   #routeModel = new RouteModel();
 
+  /**
+   * @method
+   */
   async init() {
     try {
       await Promise.all([
@@ -20,22 +27,37 @@ export default class DataService {
     }
   }
 
+  /**
+   * @method
+   */
   getFullOffersDtoListByEventType(eventType) {
     return this.#offerModel.getOffersByEventType(eventType);
   }
 
+  /**
+   * @method
+   */
   getDestinationsDto() {
     return this.#destinationModel.data;
   }
 
+  /**
+   * @method
+   */
   getDestinationDtoById(destinationId) {
     return this.#destinationModel.getDestinationById(destinationId);
   }
 
+  /**
+   * @method
+   */
   getNewRoutePointDto() {
     return structuredClone(NEW_ROUTE_POINT_DTO);
   }
 
+  /**
+   * @method
+   */
   getRouteDto() {
     const routePoints = this.#routeModel.data;
     return routePoints.map((current) => {

@@ -1,3 +1,7 @@
+/**
+ * Render position enum
+ * @enum { string }
+ */
 const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',

@@ -1,3 +1,7 @@
+/**
+ * Route points types
+ * @enum { string }
+ */
 export const RoutePointsTypes = {
   TAXI: 'taxi',
   BUS: 'bus',

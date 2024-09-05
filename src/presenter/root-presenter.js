@@ -10,6 +10,12 @@ import View from '../shared/view';
 import Presenter from '../shared/presenter';
 import { EventInfoView } from '../view/events/event-info-view';
 
+/**
+ * Presenter constructor params
+ * @typedef { Object } RootPresenterParams
+ * @property { DataService } PresenterParams.dataService
+ */
+
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
 
@@ -19,10 +25,19 @@ export default class RootPresenter extends Presenter {
   #eventsFilterFormView = new EventsFilterFormView();
   #eventsSortFormView = new EventsSortFormView();
 
+  /**
+   * Root presenter constructor
+   * @param { RootPresenterParams } params
+   */
   constructor({ dataService }) {
     super({ dataService });
   }
 
+  /**
+   * Contain View into EventsListItemView
+   * @param { View } view
+   * @returns { EventsListItemView }
+   */
   #asEventListItem(view) {
     if (view instanceof View) {
       const listItemView = new EventsListItemView();
@@ -48,7 +63,7 @@ export default class RootPresenter extends Presenter {
     editEventListItemView.render(eventsListView.getElement());
 
     for (let pointIndex = 1; pointIndex < routePoints.length; pointIndex++) {
-      const currentEventListItem = this.#asEventListItem(new EventInfoView({routePoint: routePoints[pointIndex]}));
+      const currentEventListItem = this.#asEventListItem(new EventInfoView({ routePoint: routePoints[pointIndex] }));
       currentEventListItem.render(eventsListView.getElement());
     }
   }
