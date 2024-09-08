@@ -1,5 +1,3 @@
 import Application from './app';
 
-export {
-  Application
-};
+export default Application;

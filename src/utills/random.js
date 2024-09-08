@@ -1,7 +1,7 @@
 /**
- *
- * @param { Array } source
- * @returns { any }
+ * @template TElementType
+ * @param { TElementType[] } source
+ * @returns { TElementType | null }
  */
 export const getRandomElementInArray = (source) => {
   if (Array.isArray(source)) {

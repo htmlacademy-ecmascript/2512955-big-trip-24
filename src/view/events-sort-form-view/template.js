@@ -1,3 +1,7 @@
+/**
+ * Get events sort form template
+ * @returns { string }
+ */
 export const getEventsSortFormTemplate = () =>
   `
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">

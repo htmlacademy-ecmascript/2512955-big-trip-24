@@ -1,3 +1,7 @@
+/**
+ * Get filters form template
+ * @returns { string }
+ */
 export const getFiltersFormTemplate = () =>
   `
     <form class="trip-filters" action="#" method="get">

@@ -1,3 +1,7 @@
+/**
+ * Route destinations mock
+ * @type { RouteDestinationData[] }
+ */
 const ROUTE_DESTINATIONS = JSON.parse(
   `
 [
@@ -173,3 +177,7 @@ const ROUTE_DESTINATIONS = JSON.parse(
 );
 
 export const getDestinationsMock = async () => structuredClone(ROUTE_DESTINATIONS);
+
+/**
+ * @typedef { import('../model/route-destination-model').RouteDestinationData } RouteDestinationData
+ */

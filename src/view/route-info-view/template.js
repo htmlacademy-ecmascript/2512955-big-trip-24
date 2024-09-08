@@ -1,3 +1,7 @@
+/**
+ * Get route totals view
+ * @returns { string }
+ */
 export const getRouteInfoViewTemplate = () =>
   `
     <section class="trip-main__trip-info  trip-info">
