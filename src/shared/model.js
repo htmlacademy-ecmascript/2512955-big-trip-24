@@ -1,41 +1,23 @@
 /**
- * Constructor params
- * @typedef { Object } ConstructorParams
- * @property { any } ConstructorParams.defaultData
- */
-
-/**
- * Fetch function callback type
- * @callback FetchFunction
- * @return { Promise<any> }
- */
-
-/**
- * _fetchData params
- * @typedef { Object } FetchDataParams
- * @property { FetchFunction } FetchDataParams.fetchFn
- */
-
-
-/**
  * Model parent abstract class
+ * @template TModelData
  */
 export default class Model {
   /**
    * Model data
-   * @type { any }
+   * @type { TModelData }
    */
   #data = null;
 
   /**
    * Initial data
-   * @type { any }
+   * @type { TModelData }
    */
   #defaultData = null;
 
   /**
    * Model constructor
-   * @param { ConstructorParams }
+   * @param { ConstructorParams<TModelData> } constructorParams
    */
   constructor({ defaultData }) {
     if (new.target === Model) {
@@ -51,7 +33,7 @@ export default class Model {
 
   /**
    * Data fetching
-   * @param { FetchDataParams } FetchDataParams
+   * @param { FetchDataParams<TModelData> } FetchDataParams
    */
   async _fetchData({ fetchFn }) {
     this.#data = await fetchFn();
@@ -64,3 +46,21 @@ export default class Model {
     throw new Error('Method init is abstract!');
   }
 }
+
+/**
+ * Constructor params
+ * @template TModelData
+ * @typedef { { defaultData: TModelData } } ConstructorParams
+ */
+
+/**
+ * Fetch function callback type
+ * @callback FetchFunction
+ * @return { Promise<any> }
+ */
+
+/**
+ * _fetchData params
+ * @template TModelData
+ * @typedef { { fetchFn: () => Promise<TModelData> } } FetchDataParams
+ */

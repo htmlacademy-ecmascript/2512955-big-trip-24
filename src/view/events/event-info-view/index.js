@@ -1,5 +1,3 @@
 import EventInfoView from './event-info-view';
 
-export {
-  EventInfoView
-};
+export default EventInfoView;

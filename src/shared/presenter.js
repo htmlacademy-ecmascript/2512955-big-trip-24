@@ -1,29 +1,50 @@
-/**
- * Presenter constructor params
- * @typedef { Object } PresenterParams
- * @property { DataService } PresenterParams.dataService
- */
+import DataTransferObjectService from '../service/data-transfer-object-service/data-transfer-object-service';
 
 /**
  * Presenter parent abstract class
  */
 export default class Presenter {
   /**
- * DataService instance
- * @type { DataService }
- */
-  _dataService = null;
+   * @type { OfferModel }
+   */
+  _offerModel = null;
 
   /**
- * Presenter constructor
- * @param { PresenterParams } PresenterParams
- */
-  constructor({ dataService }) {
+   * @type { RouteDestinationModel }
+   */
+  _routeDestinationModel = null;
+
+  /**
+   * @type { RouteModel }
+   */
+  _routeModel = null;
+
+  /**
+   * @param { PresenterConstructorParams } constructorParams
+   */
+  constructor({
+    destinationModel,
+    offerModel,
+    routeModel
+  }) {
     if (new.target === Presenter) {
       throw new Error('Presenter is abstract class!');
     }
 
-    this._dataService = dataService;
+    this._offerModel = offerModel;
+    this._routeDestinationModel = destinationModel;
+    this._routeModel = routeModel;
+  }
+
+  /**
+   * Get route points info
+   * @returns { RoutePointDto[] }
+   */
+  _getRoutePointsDto() {
+    return this._routeModel.data.map((current) => {
+      const offersByRoutePointType = this._offerModel.getOffersByEventType(current.type);
+      return DataTransferObjectService.getFullRoutePointDto(current, offersByRoutePointType, this._routeDestinationModel.data);
+    });
   }
 
   /**
@@ -33,3 +54,26 @@ export default class Presenter {
     throw new Error('Method init is abstract');
   }
 }
+
+/**
+ * @typedef { import('../model/offer-model').default } OfferModel
+ */
+
+/**
+ * @typedef { import('../model/route-destination-model').default } RouteDestinationModel
+ */
+
+/**
+ * @typedef { import('../model/route-model').default } RouteModel
+ */
+
+/**
+ * @typedef { import('../service/data-transfer-object-service').RoutePointDto } RoutePointDto
+ */
+
+/**
+ * @typedef { Object } PresenterConstructorParams
+ * @property { OfferModel } PresenterConstructorParams.offerModel
+ * @property { RouteDestinationModel } PresenterConstructorParams.destinationModel
+ * @property { RouteModel } PresenterConstructorParams.routeModel
+ */

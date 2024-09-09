@@ -47,18 +47,23 @@ const getOffersListTemplate = (offers = []) => {
     : '';
 };
 
+/**
+ * Get event info view template
+ * @param { { data: RoutePointDto } } params
+ * @returns { string }
+ */
 export const getEventInfoTemplate = ({ data }) => {
   const {
     destination,
     type,
-    base_price : price,
-    date_to : endDate,
-    date_from : beginDate,
+    basePrice,
+    dateFrom,
+    dateTo,
     offers,
-    is_favorite: isFavorite
+    isFavorite
   } = data;
-  const eventBegin = dayjs(beginDate);
-  const eventEnd = dayjs(endDate);
+  const eventBegin = dayjs(dateFrom);
+  const eventEnd = dayjs(dateTo);
   const isFavoriteEventActiveClassName = isFavorite ? 'event__favorite-btn--active' : '';
   return `
     <div class="event">
@@ -69,7 +74,7 @@ export const getEventInfoTemplate = ({ data }) => {
       <h3 class="event__title">${ type } ${ destination.name }</h3>
       ${ getEventSheduleTemplate({ eventBegin, eventEnd }) }
       <p class="event__price">
-        &euro;&nbsp;<span class="event__price-value">${ price }</span>
+        &euro;&nbsp;<span class="event__price-value">${ basePrice }</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       ${ getOffersListTemplate(offers) }
@@ -84,3 +89,7 @@ export const getEventInfoTemplate = ({ data }) => {
       </button>
     </div>`;
 };
+
+/**
+ * @typedef { import('../../../service/data-transfer-object-service').RoutePointDto } RoutePointDto
+ */

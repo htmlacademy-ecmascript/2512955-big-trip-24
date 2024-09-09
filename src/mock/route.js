@@ -1,7 +1,11 @@
 import { getRandomElementInArray } from '../utills/random';
 
 const MAX_POINTS_COUNT = 4;
-
+/**
+ * Route points mock
+ * @constant
+ * @type { RoutePointData[] }
+ */
 const ROUTE_POINTS = JSON.parse(`[
   {
     "id": "1167e634-9406-429b-a249-11bb2c57482c",
@@ -318,6 +322,11 @@ const ROUTE_POINTS = JSON.parse(`[
   }
 ]`);
 
+/**
+ * Get route of pointsCount points
+ * @param { number } [pointsCount=MAX_POINTS_COUNT]
+ * @returns { RoutePointData[] }
+ */
 export const getRandomRouteMock = async (pointsCount = MAX_POINTS_COUNT) => {
   const route = [];
 
@@ -327,3 +336,7 @@ export const getRandomRouteMock = async (pointsCount = MAX_POINTS_COUNT) => {
 
   return route;
 };
+
+/**
+ * @typedef { import('../model/route-model').RoutePointData } RoutePointData
+ */

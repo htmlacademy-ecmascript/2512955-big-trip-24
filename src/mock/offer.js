@@ -1,3 +1,7 @@
+/**
+ * Offers mock
+ * @type { OfferModelData[] }
+ */
 const OFFERS = JSON.parse(
   `
 [
@@ -209,3 +213,8 @@ const OFFERS = JSON.parse(
 );
 
 export const getOffersMock = async () => structuredClone(OFFERS);
+
+/**
+ * OfferModelData
+ * @typedef { import('../model/offer-model').OfferModelData } OfferModelData
+ */

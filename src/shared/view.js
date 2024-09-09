@@ -1,91 +1,55 @@
+import AbstractView from '../framework/view/abstract-view';
 import {
-  createElement,
-  render,
-  RenderPosition
-} from '../render';
+  RenderPosition,
+  render
+} from '../framework/render';
 
 /**
-* GetTemplateCallback params
-* @typedef { Object } GetTemplateCallbackParams
-* @property { any } GetTemplateCallbackParams.data
-*/
-
-/**
-* @callback GetTemplateCallback
-* @param { GetTemplateCallbackParams } params
-* @return { string }
-*/
-
-/**
-* View constructor params
-* @typedef { Object } ViewConstructorParams
-* @property { GetTemplateCallback } GetTemplateCallbackParams.getElementTemplate
-* @property { any } GetTemplateCallbackParams.data
-*/
-
-/**
- * View parent abstract class
+ * Tuned AbstractView parent abstract class
+ * @template TDataDto
  */
-export default class View {
+export default class View extends AbstractView {
   /**
-   * DOM Element
-   * @type { HTMLElement | null }
-   */
-  #element = null;
-
-  /**
-   * @type { GetTemplateCallback }
+   * @type { GetTemplateCallback<TDataDto> }
    */
   #getElementTemplate = null;
 
   /**
    * Component data DTO
-   * @type { any }
+   * @type { TDataDto }
    */
   #data = null;
 
   /**
    * View constructor
-   * @param { ViewConstructorParams } params
+   * @param { ViewConstructorParams<TDataDto> } params
    */
   constructor({
     getElementTemplate,
-    data
+    data = null
   }) {
     if (new.target === View) {
       throw new Error('View is abstract class!');
     }
+    super();
+
     this.#getElementTemplate = getElementTemplate;
     this.#data = data;
   }
 
   /**
-   * Create View template
+   * View data object
+   */
+  get _data() {
+    return this.#data;
+  }
+
+  /**
+   * View template
    * @returns { string }
    */
-  #getFilledTemplate() {
-    return this.#getElementTemplate({data: this.#data});
-  }
-
-  /**
-   * Get component DOM Element
-   * @returns { HTMLElement }
-   */
-  getElement() {
-    if (!this.#element) {
-      this.#element = createElement(this.#getFilledTemplate());
-    }
-
-    return this.#element;
-  }
-
-  /**
-   * Destroy component into DOM
-   */
-  unmount() {
-    if (this.#element) {
-      this.#element.remove();
-    }
+  get template() {
+    return this.#getElementTemplate({ data: this.#data });
   }
 
   /**
@@ -94,7 +58,28 @@ export default class View {
    * @param { RenderPosition } position
    */
   render(root, position = RenderPosition.BEFOREEND) {
-    this.unmount();
     render(this, root, position);
   }
 }
+
+/**
+* GetTemplateCallback params
+* @template TDataDto
+* @typedef { Object } GetTemplateCallbackParams
+* @property { TDataDto } GetTemplateCallbackParams.data
+*/
+
+/**
+* @template TDataDto
+* @callback GetTemplateCallback
+* @param { GetTemplateCallbackParams<TDataDto> } params
+* @returns { string }
+*/
+
+/**
+* View constructor params
+* @template TDataDto
+* @typedef { Object } ViewConstructorParams
+* @property { GetTemplateCallback<TDataDto> } GetTemplateCallbackParams.getElementTemplate
+* @property { TDataDto } GetTemplateCallbackParams.data
+*/

@@ -1,5 +1,3 @@
 import EventsListItemView from './events-list-item-view';
 
-export {
-  EventsListItemView
-};
+export default EventsListItemView;
