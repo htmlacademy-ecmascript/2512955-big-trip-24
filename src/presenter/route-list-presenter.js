@@ -1,5 +1,8 @@
 import Presenter from '../shared/presenter';
-import View from '../shared/view';
+import EventsFilterFormView from '../view/events-filter-form-view';
+import EventsSortFormView from '../view/events-sort-form-view/events-sort-form-view';
+import NewEventButtonView from '../view/new-event-button-view/new-event-button-view';
+import AbstractView from '../framework/view/abstract-view';
 import {
   EventsListItemView,
   EventsListView
@@ -7,12 +10,31 @@ import {
 import EventInfoView from '../view/events/event-info-view';
 import EditEventFormView from '../view/events/edit-event-form-view';
 import DataTransferObjectService from '../service/data-transfer-object-service/data-transfer-object-service';
-import { replace } from '../framework/render';
+import {
+  render,
+  replace,
+  RenderPosition,
+  remove
+} from '../framework/render';
+import { DEFAULT_FILTER_TYPE, FilterTypes } from '../config/filter-types';
+import { filterTypeByFunction } from '../utills/filter';
+import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
+import { sortingTypeByFunction } from '../utills/sorting';
+import EventsMessageView from '../view/events-message-view';
 
 /**
  * Route list presenter
  */
 export default class RouteListPresenter extends Presenter {
+  #activeFilterType = DEFAULT_FILTER_TYPE;
+  #activeSortingType = DEFAULT_SORTING_TYPE;
+  /**
+   * @type { EventsSortFormView }
+   */
+  #sortView = null;
+  #filterView = null;
+  #newEventButtonView = new NewEventButtonView();
+
   /**
    * Root component
    * @type { EventsListView }
@@ -23,27 +45,58 @@ export default class RouteListPresenter extends Presenter {
    * Trip events section
    * @type { HTMLElement }
    */
-  #rootElement = null;
+  #listRootElement = null;
+
+  /**
+   * Header section
+   * @type { HTMLElement }
+   */
+  #headerRootElement = null;
 
   /**
    * Presenter constructor
    * @param { RouteListConstructorParams } constructorParams
    */
-  constructor({ rootElement, ...presenterParams }) {
+  constructor({ rootElement, headerRootElement, ...presenterParams }) {
     super(presenterParams);
-    this.#rootElement = rootElement;
+    this.#listRootElement = rootElement;
+    this.#headerRootElement = headerRootElement;
   }
 
   /**
    * Contain View into EventsListItemView
-   * @param { View<null> } view Contained in EventsListItemView
+   * @param { AbstractView } view Contained in EventsListItemView
    * @returns { EventsListItemView }
    */
   #asEventListItem(view) {
-    if (view instanceof View) {
+    if (view instanceof AbstractView) {
       const listItemView = new EventsListItemView();
-      view.render(listItemView.element);
+      render(view, listItemView.element);
       return listItemView;
+    }
+  }
+
+  /**
+   * Change filter
+   * @param { FilterTypes } filterType
+   */
+  #changeFilter(filterType) {
+    if (filterType && filterType !== this.#activeFilterType) {
+      this.#activeFilterType = filterType;
+      this.#activeSortingType = DEFAULT_SORTING_TYPE;
+      this.#sortView.selectSortingInputBySortingType(DEFAULT_SORTING_TYPE);
+      this.#renderEventsList();
+    }
+  }
+
+  /**
+   * Change sorting
+   * @param { SortingTypes } sortingType
+   */
+  #changeSorting(sortingType) {
+    if (sortingType && sortingType !== this.#activeSortingType) {
+      this.#activeSortingType = sortingType;
+      this.#renderEventsList();
     }
   }
 
@@ -88,22 +141,88 @@ export default class RouteListPresenter extends Presenter {
       replace(eventInfoView, eventEditView);
     }
 
-    this.#asEventListItem(eventInfoView)
-      .render(this.#listView.element);
+    render(this.#asEventListItem(eventInfoView), this.#listView.element);
   }
 
   /**
    * Render points list
    * @param { RoutePointDto[] } routePoints points in route
    */
-  #renderEventsList(routePoints) {
-    this.#listView.render(this.#rootElement);
-    routePoints.forEach((routePount) => this.#renderRoutePoint(routePount));
+  #renderEventsList() {
+    remove(this.#listView);
+    render(this.#listView, this.#listRootElement);
+
+    const filterFunction = filterTypeByFunction[this.#activeFilterType];
+    const sortingFunction = sortingTypeByFunction[this.#activeSortingType];
+    const filteredRoutePoints = filterFunction(new Date(), this._routeModel.data);
+
+    if (filteredRoutePoints.length === 0) {
+      this.#renderEventsMessage(`There are no ${ this.#activeFilterType } events now`);
+    }
+
+    sortingFunction(filteredRoutePoints)
+      .map((current) => DataTransferObjectService.getFullRoutePointDto(
+        current,
+        this._offerModel.getOffersByEventType(current.type),
+        this._routeDestinationModel.data
+      ))
+      .forEach((routePount) => this.#renderRoutePoint(routePount));
   }
 
-  init() {
-    const routePoints = this._getRoutePointsDto();
-    this.#renderEventsList(routePoints);
+  #renderFilter() {
+    render(this.#filterView, this.#headerRootElement.querySelector('.trip-controls__filters'));
+  }
+
+  #renderNewEventButton() {
+    render(this.#newEventButtonView, this.#headerRootElement);
+  }
+
+  #renderSorting() {
+    if (this._routeModel.data.length > 0) {
+      render(this.#sortView, this.#listRootElement.querySelector('h2'), RenderPosition.AFTEREND);
+    }
+  }
+
+  /**
+   * @param { string } message
+   */
+  #renderEventsMessage(message) {
+    render(
+      new EventsMessageView({
+        message
+      }),
+      this.#listRootElement.querySelector('h2'),
+      RenderPosition.AFTEREND
+    );
+  }
+
+  init(isFailedLoadingData = false) {
+    this.#filterView = new EventsFilterFormView({
+      filterTypes: Object.values(FilterTypes),
+      onFilterChange: (filterType) => {
+        this.#changeFilter(filterType);
+      },
+      filtersRecordCountInfo: this._routeModel.getRoutesCountByFilters(filterTypeByFunction, new Date())
+    });
+    this.#sortView = new EventsSortFormView({
+      onSortingChangeCallback: (newSortingType) => {
+        this.#changeSorting(newSortingType);
+      }
+    });
+    this.#renderFilter();
+    this.#renderSorting();
+    this.#renderNewEventButton();
+
+    if (isFailedLoadingData) {
+      this.#renderEventsMessage('Failed to load latest route information');
+      return;
+    }
+
+    if (this._routeModel.data.length === 0) {
+      this.#renderEventsMessage('Click New Event to create your first point');
+      return;
+    }
+    this.#renderEventsList();
   }
 }
 
@@ -117,9 +236,19 @@ export default class RouteListPresenter extends Presenter {
 
 /**
  * @typedef { Object } RouteListConstructorAdditionalParams
- * @property { HTMLElement } rootElement
+ * @property { HTMLElement } listRootElement
+ * @property { HTMLElement } headerRootElement
+ * @property { boolean } isFailedLoadingData
  */
 
 /**
  * @typedef { PresenterConstructorParams & RouteListConstructorAdditionalParams } RouteListConstructorParams
+ */
+
+/**
+ * @typedef { import('../model/route-model').RoutePointData } RoutePointData
+ */
+
+/**
+ * @typedef { import('../config/sorting-types').SortingTypes } SortingTypes
  */

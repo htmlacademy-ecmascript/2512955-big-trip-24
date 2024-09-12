@@ -1,14 +1,16 @@
-import View from '../../../shared/view';
+import AbstractView from '../../../framework/view/abstract-view';
 import { getListItemTemplate } from './template';
 
 /**
  * Events list item view
- * @extends View<null>
+ * @extends AbstractView
  */
-export default class EventsListItemView extends View {
+export default class EventsListItemView extends AbstractView {
   constructor() {
-    super({
-      getElementTemplate: getListItemTemplate
-    });
+    super();
+  }
+
+  get template() {
+    return getListItemTemplate();
   }
 }

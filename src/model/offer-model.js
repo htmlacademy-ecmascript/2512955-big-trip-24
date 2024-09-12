@@ -22,6 +22,19 @@ export default class OfferModel extends Model {
   getOffersByEventType(eventType) {
     return this.data.find((current) => eventType === current.type)?.offers ?? [];
   }
+
+  /**
+   * Get all offers
+   * @returns { OfferData[] }
+   */
+  getAllOffers() {
+    return this.data.reduce((accum, current) => {
+      if ((current?.offers?.length ?? 0) > 0) {
+        return [...accum, ...current.offers];
+      }
+      return accum;
+    }, []);
+  }
 }
 
 /**

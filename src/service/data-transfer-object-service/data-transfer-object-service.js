@@ -94,6 +94,32 @@ export default class DataTransferObjectService {
   static getNewRoutePointDto() {
     return structuredClone(NEW_ROUTE_POINT_DTO);
   }
+
+  /**
+   * Get full route totals
+   * @param { FullRouteInfo } routeTotals
+   * @param { OfferData[] } offers
+   * @param { RouteDestinationData[] } destinations
+   * @returns { RouteTotalsDto | null }
+   */
+  static getFullRouteInfoDto(routeTotals, offers, destinations) {
+    if (routeTotals) {
+      const dateFrom = routeTotals.routeDateFrom;
+      const dateTo = routeTotals.routeDateTo;
+      const destinationNames = routeTotals.middleDestinationIds.map((current) => destinations.find((destination) => destination.id === current)?.name);
+      return {
+        dateFrom,
+        dateTo,
+        destinationNames,
+        totalPrice: +routeTotals.totalBasePrice + routeTotals.offers.reduce((acc, current) => {
+          const offerPrice = offers.find((offer) => offer.id === current)?.price ?? 0;
+          return acc + offerPrice;
+        }, 0)
+      };
+    }
+
+    return null;
+  }
 }
 
 /**
@@ -122,4 +148,12 @@ export default class DataTransferObjectService {
 
 /**
  * @typedef { import('./defaults').DestinationPictureDto } DestinationPictureDto
+ */
+
+/**
+ * @typedef { import('../../model/route-model').FullRouteInfo } FullRouteInfo
+ */
+
+/**
+ * @typedef { import('./defaults').RouteTotalsDto } RouteTotalsDto
  */

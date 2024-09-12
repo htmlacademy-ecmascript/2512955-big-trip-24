@@ -1,14 +1,21 @@
-import View from '../../shared/view';
+import AbstractView from '../../framework/view/abstract-view';
 import { getRouteInfoViewTemplate } from './template';
 
 /**
  * Route info view
- * @extends View<null>
+ * @extends AbstractView
  */
-export default class RouteInfoView extends View {
-  constructor() {
-    super({
-      getElementTemplate: getRouteInfoViewTemplate
-    });
+export default class RouteInfoView extends AbstractView {
+  #routeTotalInfo = null;
+
+  constructor({
+    data
+  }) {
+    super();
+    this.#routeTotalInfo = data;
+  }
+
+  get template() {
+    return getRouteInfoViewTemplate(this.#routeTotalInfo);
   }
 }

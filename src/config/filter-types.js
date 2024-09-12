@@ -8,3 +8,5 @@ export const FilterTypes = {
   PRESENT: 'present',
   PAST: 'past'
 };
+
+export const DEFAULT_FILTER_TYPE = FilterTypes.EVERYTHING;

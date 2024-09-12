@@ -1,45 +1,47 @@
 import Presenter from '../shared/presenter';
-import EventsFilterFormView from '../view/events-filter-form-view';
-import EventsSortFormView from '../view/events-sort-form-view/events-sort-form-view';
-import NewEventButtonView from '../view/new-event-button-view/new-event-button-view';
-import RouteInfoView from '../view/route-info-view/route-info-view';
-import { RenderPosition } from '../framework/render';
-
-const tripHeaderElement = document.querySelector('.trip-main');
+import RouteInfoView from '../view/route-info-view';
+import {
+  render,
+  RenderPosition
+} from '../framework/render';
+import DataTransferObjectService from '../service/data-transfer-object-service';
 
 export default class HeaderPresenter extends Presenter {
-  #sortView = new EventsSortFormView();
-  #filterView = new EventsFilterFormView();
-  #newEventButtonView = new NewEventButtonView();
-  #routeInfoView = new RouteInfoView();
-
   /**
-   * List root element
-   * @type { HTMLElement }
+   * @type { RouteInfoView }
    */
-  #eventsListRootElement = null;
+  #routeInfoView = null;
 
   /**
    * Header root element
    * @type { HTMLElement }
    */
-  #headerRootElement = null;
+  #rootElement = null;
 
   /**
    * Header presenter constructor
    * @param { HeaderPresenterConstructorParams } presenterParams
    */
-  constructor({ eventsListRootElement, headerRootElement, ...presenterParams }) {
+  constructor({ headerRootElement, ...presenterParams }) {
     super(presenterParams);
-    this.#eventsListRootElement = eventsListRootElement;
-    this.#headerRootElement = headerRootElement;
+    this.#rootElement = headerRootElement;
+  }
+
+  #renderViews() {
+    const routeTotalInfo = DataTransferObjectService.getFullRouteInfoDto(
+      this._routeModel.getFullRouteInfo(),
+      this._offerModel.getAllOffers(),
+      this._routeDestinationModel.data
+    );
+
+    if (routeTotalInfo) {
+      this.#routeInfoView = new RouteInfoView({ data: routeTotalInfo });
+      render(this.#routeInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
+    }
   }
 
   init() {
-    this.#routeInfoView.render(tripHeaderElement, RenderPosition.AFTERBEGIN);
-    this.#newEventButtonView.render(tripHeaderElement);
-    this.#filterView.render(tripHeaderElement.querySelector('.trip-controls__filters'));
-    this.#sortView.render(this.#eventsListRootElement.querySelector('h2'), RenderPosition.AFTEREND);
+    this.#renderViews();
   }
 }
 

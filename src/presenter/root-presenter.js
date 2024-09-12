@@ -17,6 +17,8 @@ export default class RootPresenter extends Presenter {
    */
   #headerPresenter = null;
 
+  #isFailedLoadingData = false;
+
   /**
    * Presenter constructor
    * @param { PresenterConstructorParams } presenterConstructorParams
@@ -25,11 +27,11 @@ export default class RootPresenter extends Presenter {
     super(presenterConstructorParams);
     this.#routeListPresenter = new RouteListPresenter({
       ...presenterConstructorParams,
-      rootElement: tripEventsElement
+      rootElement: tripEventsElement,
+      headerRootElement: tripMainElement
     });
     this.#headerPresenter = new HeaderPresenter({
       ...presenterConstructorParams,
-      eventsListRootElement: tripEventsElement,
       headerRootElement: tripMainElement
     });
   }
@@ -38,7 +40,7 @@ export default class RootPresenter extends Presenter {
    * Init sub Presenters
    */
   #initPresenters() {
-    this.#routeListPresenter.init();
+    this.#routeListPresenter.init(this.#isFailedLoadingData);
     this.#headerPresenter.init();
   }
 
@@ -47,7 +49,9 @@ export default class RootPresenter extends Presenter {
       this._offerModel.init(),
       this._routeDestinationModel.init(),
       this._routeModel.init()
-    ]).then(() => {
+    ]).catch((reason) => {
+      this.#isFailedLoadingData = !!reason;
+    }).finally(() => {
       this.#initPresenters();
     });
   }

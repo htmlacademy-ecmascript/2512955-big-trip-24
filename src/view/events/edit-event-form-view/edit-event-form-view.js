@@ -1,10 +1,26 @@
-import View from '../../../shared/view';
+import AbstractView from '../../../framework/view/abstract-view';
 import { getEditEventTemplate } from './template';
 
 /**
- * @extends View<RoutePointDto>
+ * @extends AbstractView
  */
-export default class EditEventFormView extends View {
+export default class EditEventFormView extends AbstractView {
+  /**
+   * Editted route point
+   * @type { RoutePointDto }
+   */
+  #routePoint = null;
+
+  /**
+   * @type { GetOffersCallback }
+   */
+  #getOffersCallback = null;
+
+  /**
+   * @type { GetDestinationsCallback }
+   */
+  #getDestinationsCallback = null;
+
   /**
    * @type { OnCloseElementClickCallback }
    */
@@ -26,18 +42,26 @@ export default class EditEventFormView extends View {
     onRollupButtonClick,
     onSaveButtonClick
   }) {
-    super({
-      getElementTemplate: ({ data }) => getEditEventTemplate({ data, getOffers, getDestinations }),
-      data: routePoint
-    });
+    super();
+    this.#onSaveButtonClickCallback = onSaveButtonClick;
+    this.#routePoint = routePoint;
+    this.#getDestinationsCallback = getDestinations;
+    this.#getOffersCallback = getOffers;
 
     if (routePoint.id && onRollupButtonClick) {
       this.#onRollupButtonClickCallback = onRollupButtonClick;
       this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollupButtonClick);
     }
 
-    this.#onSaveButtonClickCallback = onSaveButtonClick;
     this.element.addEventListener('submit', this.#onSubmitForm);
+  }
+
+  get template() {
+    return getEditEventTemplate({
+      data: this.#routePoint,
+      getDestinations: this.#getDestinationsCallback,
+      getOffers: this.#getOffersCallback
+    });
   }
 
   /**
