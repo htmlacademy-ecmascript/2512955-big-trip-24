@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '../../../utills/time';
 import { getTimePartsByMinutes } from '../../../utills/time';
 import { DateFormats } from '../../../config/date-format';
 
@@ -67,7 +67,7 @@ export const getEventInfoTemplate = ({ data }) => {
   const isFavoriteEventActiveClassName = isFavorite ? 'event__favorite-btn--active' : '';
   return `
     <div class="event">
-      <time class="event__date" datetime="${ eventBegin.format(DateFormats.DATE_FORMAT) }">${ eventBegin.format(DateFormats.DAY_FORMAT).replace(':', ' ') }</time>
+      <time class="event__date" datetime="${ eventBegin.format(DateFormats.DATE_FORMAT) }">${ eventBegin.format(DateFormats.MONTH_DAY_FORMAT).replace(':', ' ') }</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${ type }.png" alt="Event type icon">
       </div>

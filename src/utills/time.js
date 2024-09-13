@@ -1,3 +1,8 @@
+import dayjsLib from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjsLib.extend(utc);
+
 /**
  * @typedef { Object } TimePartsObject
  * @property { number } TimePartsObject.days
@@ -24,4 +29,9 @@ export const getTimePartsByMinutes = (minutes) => {
     hours: hoursRemainder,
     minutes: partMinutes
   };
+};
+
+const dayjs = dayjsLib.utc;
+export {
+  dayjs,
 };

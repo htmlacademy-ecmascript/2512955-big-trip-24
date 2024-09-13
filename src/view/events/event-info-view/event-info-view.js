@@ -1,11 +1,17 @@
-import View from '../../../shared/view';
 import { getEventInfoTemplate } from './template';
+import AbstractView from '../../../framework/view/abstract-view';
 
 /**
  * Event Info view component
- * @extends View<RoutePointDto>
+ * @extends AbstractView
  */
-export default class EventInfoView extends View {
+export default class EventInfoView extends AbstractView {
+  /**
+   * Route point info
+   * @type { RoutePointDto }
+   */
+  #routePoint = null;
+
   /**
    * User rollup button click callback
    * @type { OnRollupButtonClickCallback }
@@ -16,13 +22,17 @@ export default class EventInfoView extends View {
    * @param { ConstructorParams } params
    */
   constructor({ routePoint, onRollupButtonClick }) {
-    super({
-      getElementTemplate: getEventInfoTemplate,
-      data: routePoint
-    });
+    super();
 
+    this.#routePoint = routePoint;
     this.#onRollupButtonClick = onRollupButtonClick;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#openEventButtonClick);
+  }
+
+  get template() {
+    return getEventInfoTemplate({
+      data: this.#routePoint
+    });
   }
 
   /**

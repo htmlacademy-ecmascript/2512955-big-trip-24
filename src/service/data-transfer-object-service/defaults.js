@@ -64,3 +64,12 @@ export const NEW_ROUTE_POINT_DTO = {
  * @property { OfferDto[] } RoutePointDto.offers
  * @property { RoutePointsTypes } RoutePointDto.type
  */
+
+/**
+ * RouteTotalsDto
+ * @typedef { Object } RouteTotalsDto
+ * @property { string } FullRouteInfo.dateFrom
+ * @property { string } FullRouteInfo.dateTo
+ * @property { string[] } FullRouteInfo.destinationNames
+ * @property { number } FullRouteInfo.totalPrice
+ */

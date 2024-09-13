@@ -26,3 +26,8 @@ export default DataTransferObjectService;
  * RoutePointDto
  * @typedef { import('./defaults').RoutePointDto } RoutePointDto
  */
+
+/**
+ * RouteTotalsDto
+ * @typedef { import('./defaults').RouteTotalsDto } RouteTotalsDto
+ */

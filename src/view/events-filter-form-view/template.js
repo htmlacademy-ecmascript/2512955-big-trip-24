@@ -1,40 +1,36 @@
+import { DEFAULT_FILTER_TYPE } from '../../config/filter-types';
+
 /**
  * Get filters form template
+ * @param { FilterTypes[] } filterTypes
+ * @param { FilterTypes } activeFilterType
+ * @param { RouteCountsByFiltersInfo } recordCounts
  * @returns { string }
  */
-export const getFiltersFormTemplate = () =>
-  `
-    <form class="trip-filters" action="#" method="get">
+export const getFiltersFormTemplate = (filterTypes, activeFilterType = DEFAULT_FILTER_TYPE, recordCounts) => {
+  const renderFilterItem = (filterType) => {
+    const filterCheckedAttribute = filterType === activeFilterType ? 'checked' : '';
+    const filterDisabledAttrbute = ((recordCounts[filterType] ?? 0) === 0) ? 'disabled' : '';
+    return `
       <div class="trip-filters__filter">
-        <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" checked>
-        <label class="trip-filters__filter-label" for="filter-everything">
-          Everything
+        <input id="filter-${filterType}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filterType}" ${filterCheckedAttribute} ${filterDisabledAttrbute}>
+        <label class="trip-filters__filter-label" for="filter-${filterType}">
+          ${filterType}
         </label>
       </div>
+    `;
+  };
 
-      <div class="trip-filters__filter">
-        <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
-        <label class="trip-filters__filter-label" for="filter-future">
-          Future
-        </label>
-      </div>
+  return (filterTypes?.length ?? 0) > 0
+    ? `<form class="trip-filters" action="#" method="get">
+        ${filterTypes.map(renderFilterItem).join('')}
+        <button class="visually-hidden" type="submit">
+          Accept filter
+        </button>
+      </form>`
+    : '';
+};
 
-      <div class="trip-filters__filter">
-        <input id="filter-present" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="present">
-        <label class="trip-filters__filter-label" for="filter-present">
-          Present
-        </label>
-      </div>
-
-      <div class="trip-filters__filter">
-        <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past">
-        <label class="trip-filters__filter-label" for="filter-past">
-          Past
-        </label>
-      </div>
-
-      <button class="visually-hidden" type="submit">
-        Accept filter
-      </button>
-    </form>
-  `;
+/**
+ * @typedef { import('./events-filter-form-view').RouteCountsByFiltersInfo } RouteCountsByFiltersInfo
+ */

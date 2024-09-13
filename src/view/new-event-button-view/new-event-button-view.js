@@ -1,14 +1,16 @@
-import View from '../../shared/view';
+import AbstractView from '../../framework/view/abstract-view';
 import { getNewEventButtonTemplate } from './template';
 
 /**
  * New event button view
- * @extends View<null>
+ * @extends AbstractView
  */
-export default class NewEventButtonView extends View {
+export default class NewEventButtonView extends AbstractView {
   constructor() {
-    super({
-      getElementTemplate: getNewEventButtonTemplate
-    });
+    super();
+  }
+
+  get template() {
+    return getNewEventButtonTemplate();
   }
 }

@@ -1,6 +1,6 @@
 import { getRandomElementInArray } from '../utills/random';
 
-const MAX_POINTS_COUNT = 4;
+const MAX_POINTS_COUNT = 6;
 /**
  * Route points mock
  * @constant

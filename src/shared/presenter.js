@@ -1,5 +1,3 @@
-import DataTransferObjectService from '../service/data-transfer-object-service/data-transfer-object-service';
-
 /**
  * Presenter parent abstract class
  */
@@ -34,17 +32,6 @@ export default class Presenter {
     this._offerModel = offerModel;
     this._routeDestinationModel = destinationModel;
     this._routeModel = routeModel;
-  }
-
-  /**
-   * Get route points info
-   * @returns { RoutePointDto[] }
-   */
-  _getRoutePointsDto() {
-    return this._routeModel.data.map((current) => {
-      const offersByRoutePointType = this._offerModel.getOffersByEventType(current.type);
-      return DataTransferObjectService.getFullRoutePointDto(current, offersByRoutePointType, this._routeDestinationModel.data);
-    });
   }
 
   /**

@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '../../../utills/time';
 import { RoutePointsTypes } from '../../../config/route-points-types';
 import { DateFormats } from '../../../config/date-format';
 
@@ -56,9 +56,10 @@ const getDestinationSelectTemplate = (allDestinations, eventId) => {
  * @returns
  */
 const getPointTimeLineTemplate = ({ dateFrom, dateTo, id }) => {
-  const eventBeginValue = dateFrom ? dayjs(dateFrom).format(DateFormats.TIMELINE_INPUT_FORMAT) : '';
-  const eventEndValue = dateTo ? dayjs(dateTo).format(DateFormats.TIMELINE_INPUT_FORMAT) : '';
-
+  const eventBegin = dayjs(dateFrom);
+  const eventEnd = dayjs(dateTo);
+  const eventBeginValue = dateFrom ? eventBegin.format(DateFormats.TIMELINE_INPUT_FORMAT) : '';
+  const eventEndValue = dateTo ? eventEnd.format(DateFormats.TIMELINE_INPUT_FORMAT) : '';
   return `
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-${ id }">From</label>

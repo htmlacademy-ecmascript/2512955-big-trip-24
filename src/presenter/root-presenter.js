@@ -1,6 +1,8 @@
 import Presenter from '../shared/presenter';
 import RouteListPresenter from './route-list-presenter';
 import HeaderPresenter from './header-presenter';
+import EventsMessageView from '../view/events-message-view';
+import { remove, render, RenderPosition, replace } from '../framework/render';
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
@@ -17,6 +19,13 @@ export default class RootPresenter extends Presenter {
    */
   #headerPresenter = null;
 
+  #isFailedLoadingData = false;
+
+  /**
+   * @type { EventsMessageView }
+   */
+  #messageView = null;
+
   /**
    * Presenter constructor
    * @param { PresenterConstructorParams } presenterConstructorParams
@@ -25,20 +34,46 @@ export default class RootPresenter extends Presenter {
     super(presenterConstructorParams);
     this.#routeListPresenter = new RouteListPresenter({
       ...presenterConstructorParams,
-      rootElement: tripEventsElement
+      rootElement: tripEventsElement,
+      headerRootElement: tripMainElement,
+      showMessage: this.#renderMessage,
+      destroyMessageView: this.#destroyMessageView
     });
     this.#headerPresenter = new HeaderPresenter({
       ...presenterConstructorParams,
-      eventsListRootElement: tripEventsElement,
       headerRootElement: tripMainElement
     });
   }
+
+  #destroyMessageView = () => {
+    if (this.#messageView) {
+      remove(this.#messageView);
+      this.#messageView = null;
+    }
+  };
+
+  #renderMessage = (message) => {
+    const messageView = new EventsMessageView({ message });
+
+    if (this.#messageView) {
+      replace(messageView, this.#messageView);
+    } else {
+      render(messageView, tripEventsElement, RenderPosition.BEFOREEND);
+    }
+
+    this.#messageView = messageView;
+  };
 
   /**
    * Init sub Presenters
    */
   #initPresenters() {
-    this.#routeListPresenter.init();
+    if (this.#messageView) {
+      remove(this.#messageView);
+      this.#messageView = null;
+    }
+
+    this.#routeListPresenter.init(this.#isFailedLoadingData);
     this.#headerPresenter.init();
   }
 
@@ -47,7 +82,9 @@ export default class RootPresenter extends Presenter {
       this._offerModel.init(),
       this._routeDestinationModel.init(),
       this._routeModel.init()
-    ]).then(() => {
+    ]).catch((reason) => {
+      this.#renderMessage(reason);
+    }).finally(() => {
       this.#initPresenters();
     });
   }
@@ -55,4 +92,8 @@ export default class RootPresenter extends Presenter {
 
 /**
  * @typedef { import('../shared/presenter').PresenterConstructorParams } PresenterConstructorParams
+ */
+
+/**
+ * @typedef { PresenterConstructorParams & { showMessage: (message: string) => void } }
  */
