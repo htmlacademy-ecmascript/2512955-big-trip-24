@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '../utills/time';
 import { SortingTypes } from '../config/sorting-types';
 
 const DATE_DIFFERENCE_UNIT = 's';

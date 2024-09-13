@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '../../../utills/time';
 import { getTimePartsByMinutes } from '../../../utills/time';
 import { DateFormats } from '../../../config/date-format';
 

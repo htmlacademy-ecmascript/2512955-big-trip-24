@@ -7,6 +7,7 @@ import { DEFAULT_FILTER_TYPE, FilterTypes } from '../../config/filter-types';
  * @extends AbstractView
  */
 export default class EventsFilterFormView extends AbstractView {
+  #activeFilterType = DEFAULT_FILTER_TYPE;
   /**
    * @type { RouteCountsByFiltersInfo }
    */
@@ -18,20 +19,18 @@ export default class EventsFilterFormView extends AbstractView {
   #onChangeFilterCallback = null;
   /**
    * Constructor params
-   * @param { { onFilterChange: OnChangeFilterCallback, filtersRecordCountInfo: RouteCountsByFiltersInfo } } params
+   * @param { { onFilterChange: OnChangeFilterCallback, filtersRecordCountInfo: RouteCountsByFiltersInfo, activeFilterType: FilterTypes } } params
    */
-  constructor({ onFilterChange, filtersRecordCountInfo }) {
+  constructor({ onFilterChange, filtersRecordCountInfo, activeFilterType }) {
     super();
     this.#onChangeFilterCallback = onFilterChange;
     this.#recordCounts = filtersRecordCountInfo;
-
-    Array.from(this.element.querySelectorAll('input[type="radio"]')).forEach((current) => {
-      current.addEventListener('change', this.#onFilterInputChange);
-    });
+    this.#activeFilterType = activeFilterType;
+    this.element.addEventListener('change', this.#onFilterInputChange);
   }
 
   get template() {
-    return getFiltersFormTemplate(Object.values(FilterTypes), DEFAULT_FILTER_TYPE, this.#recordCounts);
+    return getFiltersFormTemplate(Object.values(FilterTypes), this.#activeFilterType, this.#recordCounts);
   }
 
   /**

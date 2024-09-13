@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '../utills/time';
 import { FilterTypes } from '../config/filter-types';
 import { DateFormats } from '../config/date-format';
 
@@ -17,11 +17,11 @@ const everythingFilter = (date, routePoints) => routePoints;
  * @returns { RoutePointData[] } Filtered route points
  */
 const futureFilter = (date, routePoints) => {
-  const nowDate = dayjs(date, DateFormats.DATE_FORMAT);
+  const nowDate = dayjs(date);
 
   return routePoints.filter((current) => {
     const { date_from: dateFrom } = current;
-    const beginDate = dayjs(dateFrom, DateFormats.DATE_FORMAT);
+    const beginDate = dayjs(dateFrom);
 
     return beginDate.isAfter(nowDate);
   });
@@ -38,8 +38,8 @@ const presentFilter = (date, routePoints) => {
 
   return routePoints.filter((current) => {
     const { date_from: dateFrom, date_to: dateTo } = current;
-    const beginDate = dayjs(dateFrom, DateFormats.DATE_FORMAT);
-    const endDate = dayjs(dateTo, DateFormats.DATE_FORMAT);
+    const beginDate = dayjs(dateFrom);
+    const endDate = dayjs(dateTo);
 
     return (beginDate.diff(nowDate) <= 0)
       && (endDate.diff(nowDate) >= 0);
@@ -53,11 +53,11 @@ const presentFilter = (date, routePoints) => {
  * @returns { RoutePointData[] } Filtered route points
  */
 const pastFilter = (date, routePoints) => {
-  const nowDate = dayjs(date, DateFormats.DATE_FORMAT);
+  const nowDate = dayjs(date);
 
   return routePoints.filter((current) => {
     const { date_to: dateTo } = current;
-    const endDate = dayjs(dateTo, DateFormats.DATE_FORMAT);
+    const endDate = dayjs(dateTo);
 
     return endDate.isBefore(nowDate);
   });

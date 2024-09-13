@@ -20,7 +20,6 @@ import { DEFAULT_FILTER_TYPE, FilterTypes } from '../config/filter-types';
 import { filterTypeByFunction } from '../utills/filter';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
 import { sortingTypeByFunction } from '../utills/sorting';
-import EventsMessageView from '../view/events-message-view';
 
 /**
  * Route list presenter
@@ -53,14 +52,19 @@ export default class RouteListPresenter extends Presenter {
    */
   #headerRootElement = null;
 
+  #showMessage = null;
+  #destroyMessageView = null;
+
   /**
    * Presenter constructor
    * @param { RouteListConstructorParams } constructorParams
    */
-  constructor({ rootElement, headerRootElement, ...presenterParams }) {
+  constructor({ destroyMessageView, showMessage, rootElement, headerRootElement, ...presenterParams }) {
     super(presenterParams);
     this.#listRootElement = rootElement;
     this.#headerRootElement = headerRootElement;
+    this.#showMessage = showMessage;
+    this.#destroyMessageView = destroyMessageView;
   }
 
   /**
@@ -84,7 +88,9 @@ export default class RouteListPresenter extends Presenter {
     if (filterType && filterType !== this.#activeFilterType) {
       this.#activeFilterType = filterType;
       this.#activeSortingType = DEFAULT_SORTING_TYPE;
-      this.#sortView.selectSortingInputBySortingType(DEFAULT_SORTING_TYPE);
+      this.#destroyMessageView();
+      this.#renderSorting();
+      this.#renderFilter();
       this.#renderEventsList();
     }
   }
@@ -96,6 +102,7 @@ export default class RouteListPresenter extends Presenter {
   #changeSorting(sortingType) {
     if (sortingType && sortingType !== this.#activeSortingType) {
       this.#activeSortingType = sortingType;
+      this.#renderSorting();
       this.#renderEventsList();
     }
   }
@@ -157,7 +164,7 @@ export default class RouteListPresenter extends Presenter {
     const filteredRoutePoints = filterFunction(new Date(), this._routeModel.data);
 
     if (filteredRoutePoints.length === 0) {
-      this.#renderEventsMessage(`There are no ${ this.#activeFilterType } events now`);
+      this.#showMessage(`There are no ${ this.#activeFilterType } events now`);
     }
 
     sortingFunction(filteredRoutePoints)
@@ -170,7 +177,24 @@ export default class RouteListPresenter extends Presenter {
   }
 
   #renderFilter() {
-    render(this.#filterView, this.#headerRootElement.querySelector('.trip-controls__filters'));
+    const filterView = new EventsFilterFormView({
+      filterTypes: Object.values(FilterTypes),
+      onFilterChange: (filterType) => {
+        this.#changeFilter(filterType);
+      },
+      filtersRecordCountInfo: this._routeModel.getRoutesCountByFilters(filterTypeByFunction, new Date()),
+      activeFilterType: this.#activeFilterType
+    });
+
+    if (this.#filterView) {
+      replace(filterView, this.#filterView);
+      remove(this.#filterView);
+    } else {
+      render(filterView, this.#headerRootElement.querySelector('.trip-controls__filters'));
+    }
+
+    this.#filterView = filterView;
+    //render(this.#filterView, this.#headerRootElement.querySelector('.trip-controls__filters'));
   }
 
   #renderNewEventButton() {
@@ -179,47 +203,29 @@ export default class RouteListPresenter extends Presenter {
 
   #renderSorting() {
     if (this._routeModel.data.length > 0) {
-      render(this.#sortView, this.#listRootElement.querySelector('h2'), RenderPosition.AFTEREND);
+      const newSortingView = new EventsSortFormView({
+        onSortingChangeCallback: (newSortingType) => {
+          this.#changeSorting(newSortingType);
+        },
+        activeSortType: this.#activeSortingType
+      });
+
+      if (this.#sortView) {
+        replace(newSortingView, this.#sortView);
+      } else {
+        render(newSortingView, this.#listRootElement.querySelector('h2'), RenderPosition.AFTEREND);
+      }
+      this.#sortView = newSortingView;
     }
   }
 
-  /**
-   * @param { string } message
-   */
-  #renderEventsMessage(message) {
-    render(
-      new EventsMessageView({
-        message
-      }),
-      this.#listRootElement.querySelector('h2'),
-      RenderPosition.AFTEREND
-    );
-  }
-
-  init(isFailedLoadingData = false) {
-    this.#filterView = new EventsFilterFormView({
-      filterTypes: Object.values(FilterTypes),
-      onFilterChange: (filterType) => {
-        this.#changeFilter(filterType);
-      },
-      filtersRecordCountInfo: this._routeModel.getRoutesCountByFilters(filterTypeByFunction, new Date())
-    });
-    this.#sortView = new EventsSortFormView({
-      onSortingChangeCallback: (newSortingType) => {
-        this.#changeSorting(newSortingType);
-      }
-    });
+  init() {
     this.#renderFilter();
     this.#renderSorting();
     this.#renderNewEventButton();
 
-    if (isFailedLoadingData) {
-      this.#renderEventsMessage('Failed to load latest route information');
-      return;
-    }
-
     if (this._routeModel.data.length === 0) {
-      this.#renderEventsMessage('Click New Event to create your first point');
+      this.#showMessage('Click New Event to create your first point');
       return;
     }
     this.#renderEventsList();
@@ -236,9 +242,11 @@ export default class RouteListPresenter extends Presenter {
 
 /**
  * @typedef { Object } RouteListConstructorAdditionalParams
- * @property { HTMLElement } listRootElement
- * @property { HTMLElement } headerRootElement
- * @property { boolean } isFailedLoadingData
+ * @property { HTMLElement } RouteListConstructorAdditionalParams.listRootElement
+ * @property { HTMLElement } RouteListConstructorAdditionalParams.headerRootElement
+ * @property { boolean } RouteListConstructorAdditionalParams.isFailedLoadingData
+ * @property { (message: string) => void } RouteListConstructorAdditionalParams.showMessage
+ * @property { () => void } RouteListConstructorAdditionalParams.destroyMessageView
  */
 
 /**

@@ -8,28 +8,23 @@ import { getEventsSortFormTemplate } from './template';
  */
 export default class EventsSortFormView extends AbstractView {
   /**
+   * @type { SortingTypes }
+   */
+  #activeSortingType = DEFAULT_SORTING_TYPE;
+
+  /**
    * @type { onSortingChangeCallback }
    */
   #onSortingChangeCallback = null;
   /**
    * Constructor params
-   * @param { { onSortingChangeCallback: OnChangeSortingCallback } } params
+   * @param { { onSortingChangeCallback: OnChangeSortingCallback, activeSortType: SortingTypes } } params
    */
-  constructor({ onSortingChangeCallback }) {
+  constructor({ onSortingChangeCallback, activeSortType }) {
     super();
+    this.#activeSortingType = activeSortType;
     this.#onSortingChangeCallback = onSortingChangeCallback;
-    Array.from(this.element.querySelectorAll('input[type="radio"]')).forEach((current) => {
-      current.addEventListener('change', this.#onSortingChange);
-    });
-  }
-
-  /**
-   * Select input
-   * @param { SortingTypes } sortingType
-   */
-  selectSortingInputBySortingType(sortingType) {
-    this.element.querySelector(`#sort-${ sortingType }`).checked = true;
-    this.#onSortingChangeCallback(sortingType);
+    this.element.addEventListener('change', this.#onSortingChange);
   }
 
   /**
@@ -45,7 +40,7 @@ export default class EventsSortFormView extends AbstractView {
   };
 
   get template() {
-    return getEventsSortFormTemplate(Object.values(SortingTypes), DEFAULT_SORTING_TYPE);
+    return getEventsSortFormTemplate(Object.values(SortingTypes), this.#activeSortingType);
   }
 }
 
