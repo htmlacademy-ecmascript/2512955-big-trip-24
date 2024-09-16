@@ -32,6 +32,15 @@ export default class Model {
   }
 
   /**
+   * Protected setter model data
+   * @param { TModelData[] } value
+   * @protected
+   */
+  set data(value) {
+    this.#data = value;
+  }
+
+  /**
    * Data fetching
    * @param { FetchDataParams<TModelData> } FetchDataParams
    */

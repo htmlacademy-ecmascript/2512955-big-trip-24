@@ -2,10 +2,11 @@ import Model from '../shared/model';
 import { getRandomRouteMock } from '../mock/route';
 import { SortingTypes } from '../config/sorting-types';
 import { sortingTypeByFunction } from '../utills/sorting';
+import { updateItem } from '../utills/array';
 
 /**
  * RouteModel
- * @extends Model<RoutePointData[]>
+ * @extends Model<RoutePointData>
  */
 export default class RouteModel extends Model {
   constructor() {
@@ -14,6 +15,28 @@ export default class RouteModel extends Model {
 
   async init() {
     super._fetchData({ fetchFn: getRandomRouteMock });
+  }
+
+  /**
+   * Get route point by id
+   * @param { string } pointId
+   * @returns { RoutePointData }
+   */
+  getRoutePointById(pointId) {
+    return this.data.find((current) => current.id === pointId);
+  }
+
+  /**
+   * Update existed route point
+   * @param { RoutePointData } routePoint
+   */
+  updateRoutePoint(routePoint) {
+    /**
+     * @param { RoutePointData } current
+     * @returns { boolean }
+     */
+    const routeCompareFunction = (current) => current.id !== routePoint.id;
+    this.data = updateItem(this.data, routePoint, routeCompareFunction);
   }
 
   /**
@@ -75,6 +98,7 @@ export default class RouteModel extends Model {
 /**
  * RouteModelData
  * @typedef { Object } RoutePointData
+ * @property { string } RoutePointData.id
  * @property { number } RoutePointData.base_price
  * @property { string } RoutePointData.date_from
  * @property { string } RoutePointData.date_to

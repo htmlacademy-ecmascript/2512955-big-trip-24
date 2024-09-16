@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { NEW_ROUTE_POINT_DTO } from './defaults';
 
 /**
@@ -119,6 +120,24 @@ export default class DataTransferObjectService {
     }
 
     return null;
+  }
+
+  /**
+   * Cast RoutePointDto to RoutePointData
+   * @param { RoutePointDto } routePointDto
+   * @returns { RoutePointData }
+   */
+  static createRoutePointDataByRoutePointDto(routePointDto) {
+    return {
+      id: routePointDto.id,
+      base_price: routePointDto.basePrice,
+      date_from: routePointDto.dateFrom,
+      date_to: routePointDto.dateTo,
+      destination: routePointDto.destination.id,
+      is_favorite: routePointDto.isFavorite,
+      type: routePointDto.type,
+      offers: routePointDto.offers.map((current) => current.id)
+    };
   }
 }
 
