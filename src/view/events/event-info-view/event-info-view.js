@@ -19,14 +19,21 @@ export default class EventInfoView extends AbstractView {
   #onRollupButtonClick = null;
 
   /**
+   * @type { OnFavoriteButtonClickCallback }
+   */
+  #onFavoriteButtonClickCallback = null;
+
+  /**
    * @param { ConstructorParams } params
    */
-  constructor({ routePoint, onRollupButtonClick }) {
+  constructor({ routePoint, onRollupButtonClick, onFavoriteButtonClickCallback }) {
     super();
 
     this.#routePoint = routePoint;
     this.#onRollupButtonClick = onRollupButtonClick;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#openEventButtonClick);
+    this.#onFavoriteButtonClickCallback = onFavoriteButtonClickCallback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onOpenEventButtonClick);
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#onFavoriteButtonClick);
   }
 
   get template() {
@@ -39,9 +46,18 @@ export default class EventInfoView extends AbstractView {
    * Open button click handler
    * @param { Event } event
    */
-  #openEventButtonClick = (event) => {
+  #onOpenEventButtonClick = (event) => {
     event.preventDefault();
     this.#onRollupButtonClick();
+  };
+
+  /**
+   * Open button click handler
+   * @param { Event } event
+   */
+  #onFavoriteButtonClick = (event) => {
+    event.preventDefault();
+    this.#onFavoriteButtonClickCallback();
   };
 }
 
@@ -53,9 +69,15 @@ export default class EventInfoView extends AbstractView {
  * @typedef { Object } ConstructorParams
  * @property { RoutePointDto } ConstructorParams.routePoint
  * @property { OnRollupButtonClickCallback } ConstructorParams.onRollupButtonClick
+ * @property { OnFavoriteButtonClickCallback } ConstructorParams.onFavoriteButtonClickCallback
  */
 
 /**
  * @callback OnRollupButtonClickCallback
+ * @returns { void }
+ */
+
+/**
+ * @callback OnFavoriteButtonClickCallback
  * @returns { void }
  */

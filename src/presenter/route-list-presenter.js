@@ -2,13 +2,7 @@ import Presenter from '../shared/presenter';
 import EventsFilterFormView from '../view/events-filter-form-view';
 import EventsSortFormView from '../view/events-sort-form-view/events-sort-form-view';
 import NewEventButtonView from '../view/new-event-button-view/new-event-button-view';
-import AbstractView from '../framework/view/abstract-view';
-import {
-  EventsListItemView,
-  EventsListView
-} from '../view/events-list-view';
-import EventInfoView from '../view/events/event-info-view';
-import EditEventFormView from '../view/events/edit-event-form-view';
+import { EventsListView } from '../view/events-list-view';
 import DataTransferObjectService from '../service/data-transfer-object-service/data-transfer-object-service';
 import {
   render,
@@ -20,6 +14,7 @@ import { DEFAULT_FILTER_TYPE, FilterTypes } from '../config/filter-types';
 import { filterTypeByFunction } from '../utills/filter';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
 import { sortingTypeByFunction } from '../utills/sorting';
+import RoutePointItemPresenter from './route-point-item-presenter';
 
 /**
  * Route list presenter
@@ -33,6 +28,11 @@ export default class RouteListPresenter extends Presenter {
   #sortView = null;
   #filterView = null;
   #newEventButtonView = new NewEventButtonView();
+
+  /**
+   * @type { Map<string, RoutePointItemPresenter> }
+   */
+  #pointIdToPresenterMap = new Map();
 
   /**
    * Root component
@@ -67,17 +67,10 @@ export default class RouteListPresenter extends Presenter {
     this.#destroyMessageView = destroyMessageView;
   }
 
-  /**
-   * Contain View into EventsListItemView
-   * @param { AbstractView } view Contained in EventsListItemView
-   * @returns { EventsListItemView }
-   */
-  #asEventListItem(view) {
-    if (view instanceof AbstractView) {
-      const listItemView = new EventsListItemView();
-      render(view, listItemView.element);
-      return listItemView;
-    }
+  #onRollupEventInfoViewClick() {
+    this.#pointIdToPresenterMap.forEach((itemPresenter) => {
+      itemPresenter.resetView();
+    });
   }
 
   /**
@@ -112,43 +105,11 @@ export default class RouteListPresenter extends Presenter {
    * @param { RoutePointDto } routePoint
    */
   #renderRoutePoint(routePoint) {
-    /**
-     * @param { KeyboardEvent } event
-     */
-    const onEscapeKeydown = (event) => {
-      if (event.key === 'Escape') {
-        replaceEditViewToInfoView();
-      }
-    };
+    const routePointId = routePoint.id;
 
-    const eventInfoView = new EventInfoView({
-      routePoint: routePoint,
-      onRollupButtonClick: () => {
-        replaceInfoViewToEditView();
-        document.addEventListener('keydown', onEscapeKeydown);
-      }
-    });
-
-    const eventEditView = new EditEventFormView({
-      routePoint,
-      getOffers: (eventType) => this._offerModel
-        .getOffersByEventType(eventType)
-        .map((current) => DataTransferObjectService.getOfferDto(current)),
-      getDestinations: () => this._routeDestinationModel.data.map((current) => DataTransferObjectService.getDestinationDto(current)),
-      onRollupButtonClick: () => replaceEditViewToInfoView(),
-      onSaveButtonClick: () => replaceEditViewToInfoView()
-    });
-
-    function replaceInfoViewToEditView() {
-      replace(eventEditView, eventInfoView);
+    if (routePointId) {
+      this.#pointIdToPresenterMap.get(routePointId)?.init(routePoint);
     }
-
-    function replaceEditViewToInfoView() {
-      document.removeEventListener('keydown', onEscapeKeydown);
-      replace(eventInfoView, eventEditView);
-    }
-
-    render(this.#asEventListItem(eventInfoView), this.#listView.element);
   }
 
   /**
@@ -158,7 +119,7 @@ export default class RouteListPresenter extends Presenter {
   #renderEventsList() {
     remove(this.#listView);
     render(this.#listView, this.#listRootElement);
-
+    this.#pointIdToPresenterMap.clear();
     const filterFunction = filterTypeByFunction[this.#activeFilterType];
     const sortingFunction = sortingTypeByFunction[this.#activeSortingType];
     const filteredRoutePoints = filterFunction(new Date(), this._routeModel.data);
@@ -173,7 +134,23 @@ export default class RouteListPresenter extends Presenter {
         this._offerModel.getOffersByEventType(current.type),
         this._routeDestinationModel.data
       ))
-      .forEach((routePount) => this.#renderRoutePoint(routePount));
+      .forEach((routePoint) => {
+        if (!this.#pointIdToPresenterMap.has(routePoint.id)) {
+          this.#pointIdToPresenterMap.set(
+            routePoint.id,
+            new RoutePointItemPresenter({
+              destinationModel: this._routeDestinationModel,
+              offerModel: this._offerModel,
+              rootElement: this.#listView.element,
+              routeModel: this._routeModel,
+              onRollupClickCallback: () => this.#onRollupEventInfoViewClick(),
+              routePoint
+            })
+          );
+        }
+
+        this.#renderRoutePoint(routePoint);
+      });
   }
 
   #renderFilter() {
@@ -194,7 +171,6 @@ export default class RouteListPresenter extends Presenter {
     }
 
     this.#filterView = filterView;
-    //render(this.#filterView, this.#headerRootElement.querySelector('.trip-controls__filters'));
   }
 
   #renderNewEventButton() {
@@ -212,6 +188,7 @@ export default class RouteListPresenter extends Presenter {
 
       if (this.#sortView) {
         replace(newSortingView, this.#sortView);
+        remove(this.#sortView);
       } else {
         render(newSortingView, this.#listRootElement.querySelector('h2'), RenderPosition.AFTEREND);
       }
