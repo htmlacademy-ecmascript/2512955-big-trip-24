@@ -13,7 +13,7 @@ export const getEventsSortFormTemplate = (sortingTypes, activeSortingType) => {
 
     return `
       <div class="trip-sort__item  trip-sort__item--${sortingType}">
-        <input id="sort-${sortingType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sortingType}" ${checkedAttribute} ${disabledAttribute}>
+        <input id="sort-${sortingType}" class="trip-sort__input  visually-hidden" data-sort-type="${ sortingType }" type="radio" name="trip-sort" value="sort-${sortingType}" ${checkedAttribute} ${disabledAttribute}>
         <label class="trip-sort__btn" for="sort-${sortingType}">
           ${sortingType}
         </label>
