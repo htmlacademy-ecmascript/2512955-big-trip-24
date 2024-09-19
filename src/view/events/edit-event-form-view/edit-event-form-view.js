@@ -1,5 +1,6 @@
 import AbstractStatefulView from '../../../framework/view/abstract-stateful-view';
 import { getEditEventTemplate } from './template';
+import { OFFER_INPUT_NAME } from './const';
 
 /**
  * @extends AbstractStatefulView
@@ -104,12 +105,28 @@ export default class EditEventFormView extends AbstractStatefulView {
     this.#onRollupButtonClickCallback();
   };
 
+  #onOfferInputChange = (event) => {
+    event.preventDefault();
+    const element = event.target;
+
+    if (element?.name === OFFER_INPUT_NAME) {
+      const offerId = element.dataset.offerId;
+      const offer = this._state.fullOffers.find((current) => current.id === offerId);
+
+      if (offer) {
+        this.updateElement({
+          offers: element?.checked ? [...this._state.offers, offer] : this._state.offers.filter((current) => current.id !== offer.id)
+        });
+      }
+    }
+  };
+
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#onSubmitForm);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeChange);
 
     this.element.querySelector('.event__input--destination').addEventListener('blur', this.#onDestinationSelect);
-
+    this.element.querySelector('.event__section--offers').addEventListener('change', this.#onOfferInputChange);
     if (!this.#isNewEvent) {
       this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollupButtonClick);
     }
