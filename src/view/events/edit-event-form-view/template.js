@@ -41,6 +41,11 @@ const getEventTypeFieldSetTemplate = (selectedType, eventId) => {
  * @returns { string }
  */
 const getDestinationSelectTemplate = (allDestinations, eventId) => {
+  /**
+   * One option render
+   * @param { DestinationDto } option
+   * @returns { string }
+   */
   const renderDestinationOption = (option) => `<option value="${ option.name }"></option>`;
 
   return allDestinations?.length
@@ -104,9 +109,10 @@ const getEventOffersTemplate = (eventOffers, fullOffers) => {
    */
   const renderOffer = (offer) => {
     const offerCheckedAttribute = eventOffers.some((current) => current.id === offer.id) ? 'checked' : '';
+    const offerIdDataSet = `data-offer-id="${ offer.id }"`;
     return `
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${ offer.id }" type="checkbox" name="event-offer-luggage" ${ offerCheckedAttribute }>
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${ offer.id }" ${ offerIdDataSet } type="checkbox" name="event-offer-luggage" ${ offerCheckedAttribute }>
       <label class="event__offer-label" for="event-offer-luggage-${ offer.id }">
         <span class="event__offer-title">${ offer.title }</span>
         &plus;&euro;&nbsp;
@@ -149,10 +155,10 @@ export const getEventPhotosTemplate = (photos) => {
 
 /**
  * Get EditForm template
- * @param { { data: RoutePointDto, getOffers: (eventType: RoutePointsTypes) => OfferDto[], getDestinations: () => DestinationDto[] } } params
+ * @param { EditEventFormViewState } state
  * @returns { string }
  */
-export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
+export const getEditEventTemplate = ({ fullDestinations, fullOffers, ...data }) => {
   const {
     id,
     type,
@@ -162,8 +168,7 @@ export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
     dateFrom,
     dateTo
   } = data;
-  const fullOffersByEventType = getOffers(type);
-  const allDestinations = getDestinations();
+
   const cancelButtonDescription = id ? 'Delete' : 'Cancel';
 
   const destinationTemplate = destination
@@ -194,7 +199,7 @@ export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
             ${type}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-${ id }" type="text" name="event-destination" value="${ destination?.name ?? '' }" list="destination-list-${ id }">
-          ${getDestinationSelectTemplate(allDestinations, id)}
+          ${getDestinationSelectTemplate(fullDestinations, id)}
         </div>
 
         ${ getPointTimeLineTemplate({ id, dateFrom, dateTo }) }
@@ -208,7 +213,7 @@ export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
           </button>` }
       </header>
       <section class="event__details">
-        ${ getEventOffersTemplate(offers, fullOffersByEventType, id) }
+        ${ getEventOffersTemplate(offers, fullOffers, id) }
         ${ destinationTemplate }
       </section>
     </form>
@@ -238,4 +243,8 @@ export const getEditEventTemplate = ({ data, getOffers, getDestinations }) => {
 /**
  * @template TSourceType
  * @typedef { TSourceType | null } Nullable
+ */
+
+/**
+ * @typedef { import('./edit-event-form-view').EditEventFormViewState } EditEventFormViewState
  */
