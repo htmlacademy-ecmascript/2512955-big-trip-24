@@ -51,7 +51,7 @@ export default class Presenter {
  */
 
 /**
- * @typedef { import('../model/route-model').default } RouteModel
+ * @typedef { import('../model/route-model/route-model').default } RouteModel
  */
 
 /**

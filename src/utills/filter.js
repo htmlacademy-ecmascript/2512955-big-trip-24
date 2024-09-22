@@ -75,7 +75,7 @@ export const filterTypeByFunction = {
 };
 
 /**
- * @typedef { import('../model/route-model').RoutePointData } RoutePointData
+ * @typedef { import('../model/route-model/route-model').RoutePointData } RoutePointData
  */
 
 /**

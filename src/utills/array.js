@@ -13,7 +13,6 @@ export const updateItem = (source, value, compareFn) => {
    * @returns { boolean }
    */
   const defaultCompareFunction = (current) => current === value;
-  const sourceCopy = [...source].filter(compareFn ?? defaultCompareFunction);
-  sourceCopy.push(value);
-  return sourceCopy;
+  const comparer = compareFn ?? defaultCompareFunction;
+  return source.map((current) => comparer(current) ? value : current);
 };

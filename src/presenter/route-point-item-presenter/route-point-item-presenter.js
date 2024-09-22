@@ -6,6 +6,7 @@ import EventInfoView from '../../view/events/event-info-view';
 import DataTransferObjectService from '../../service/data-transfer-object-service';
 import AbstractView from '../../framework/view/abstract-view';
 import { EventsListItemView } from '../../view/events-list-view';
+import { EventTypes } from '../../model/route-model';
 
 export default class RoutePointItemPresenter extends Presenter {
   /**
@@ -27,17 +28,23 @@ export default class RoutePointItemPresenter extends Presenter {
    * @type { ViewModes }
    */
   #viewMode = DEFAULT_VIEW_MODE;
-  #onRollupButtonClickCallback = null;
+  #rollupButtonClickCallback = null;
+
+  /**
+   * @type { OnDataChangeCallback }
+   */
+  #dataChangeCallback = null;
 
   /**
    * Presenter constructor
    * @param { RoutePointItemConstructorParams } presenterParams
    */
-  constructor({ rootElement, routePoint, onRollupClickCallback, ...presenterParams }) {
+  constructor({ rootElement, routePoint, onRollupClick, onDataChange, ...presenterParams }) {
     super(presenterParams);
     this.#rootElement = rootElement;
     this.#routePoint = routePoint;
-    this.#onRollupButtonClickCallback = onRollupClickCallback;
+    this.#dataChangeCallback = onDataChange;
+    this.#rollupButtonClickCallback = onRollupClick;
   }
 
   #asEventListItem(view) {
@@ -67,7 +74,7 @@ export default class RoutePointItemPresenter extends Presenter {
   /**
   * @param { KeyboardEvent } event
   */
-  #onEscapeKeydown = (event) => {
+  #escapeKeydownHandler = (event) => {
     if (event.key === 'Escape') {
       this.#replaceEditViewToInfoView();
     }
@@ -81,27 +88,34 @@ export default class RoutePointItemPresenter extends Presenter {
 
   #replaceEditViewToInfoView() {
     if (this.#viewMode === ViewModes.EDIT) {
-      document.removeEventListener('keydown', this.#onEscapeKeydown);
+      document.removeEventListener('keydown', this.#escapeKeydownHandler);
       this.#showViewByMode(ViewModes.VIEW);
     }
   }
 
-  #onFavoriteButtonClick() {
-    this._routeModel.updateRoutePoint(
-      DataTransferObjectService.createRoutePointDataByRoutePointDto(
-        {
-          ...this.#routePoint,
-          isFavorite: !this.#routePoint.isFavorite
-        })
+  /**
+   * Favorite change
+   */
+  #favoriteButtonClickHandler = () => {
+    this.#dataChangeCallback(
+      EventTypes.MINOR_ITEM_UPDATE,
+      {
+        ...this.#routePoint,
+        isFavorite: !this.#routePoint.isFavorite
+      }
     );
+  };
 
-    this.#routePoint = DataTransferObjectService.getFullRoutePointDto(
-      this._routeModel.getRoutePointById(this.#routePoint.id),
-      this._offerModel.getOffersByEventType(this.#routePoint.type),
-      this._routeDestinationModel.data
+  /**
+   * Submit route point changes
+   * @param { RoutePointDto } routePointDto
+   */
+  #editFormSubmitHandler = (routePointDto) => {
+    this.#dataChangeCallback(
+      EventTypes.MAJOR_ITEM_UPDATE,
+      routePointDto
     );
-    this.#showViewByMode(this.#viewMode);
-  }
+  };
 
   /**
    * Create edit view by this.#routePoint
@@ -117,7 +131,7 @@ export default class RoutePointItemPresenter extends Presenter {
       onRollupButtonClick: () => {
         this.#replaceEditViewToInfoView();
       },
-      onSaveButtonClick: () => this.#replaceEditViewToInfoView()
+      onSubmit: this.#editFormSubmitHandler
     });
   }
 
@@ -129,11 +143,11 @@ export default class RoutePointItemPresenter extends Presenter {
     return new EventInfoView({
       routePoint: this.#routePoint,
       onRollupButtonClick: () => {
-        this.#onRollupButtonClickCallback();
+        this.#rollupButtonClickCallback();
         this.#replaceInfoViewToEditView();
-        document.addEventListener('keydown', this.#onEscapeKeydown);
+        document.addEventListener('keydown', this.#escapeKeydownHandler);
       },
-      onFavoriteButtonClickCallback: () => this.#onFavoriteButtonClick()
+      onFavoriteButtonClickCallback: this.#favoriteButtonClickHandler
     });
   }
 
@@ -196,11 +210,23 @@ export default class RoutePointItemPresenter extends Presenter {
  * @typedef { Object } RoutePountPresenterAdditionalParams
  * @property { RoutePointDto } RoutePountPresenterAdditionalParams.routePoint
  * @property { HTMLElement } RoutePountPresenterAdditionalParams.rootElement
- * @property { () => void } RoutePountPresenterAdditionalParams.onRollupClickCallback
+ * @property { () => void } RoutePountPresenterAdditionalParams.onRollupClick
+ * @property { OnDataChangeCallback } RoutePountPresenterAdditionalParams.onDataChange
+ */
+
+/**
+ * @typedef { import('../../model/route-model').EventTypes } EventTypes
  */
 
 /**
  * @typedef { import('../../framework/view/abstract-view').default } AbstractView
+ */
+
+/**
+ * @callback OnDataChangeCallback
+ * @param { EventTypes } eventType
+ * @param { RoutePointDto } DataTransferObjectService
+ * @returns { void }
  */
 
 /**

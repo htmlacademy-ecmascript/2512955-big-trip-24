@@ -56,5 +56,5 @@ export const sortingTypeByFunction = {
 };
 
 /**
- * @typedef { import('../model/route-model').RoutePointData }
+ * @typedef { import('../model/route-model/route-model').RoutePointData }
  */

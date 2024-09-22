@@ -1,8 +1,8 @@
-import Model from '../shared/model';
-import { getRandomRouteMock } from '../mock/route';
-import { SortingTypes } from '../config/sorting-types';
-import { sortingTypeByFunction } from '../utills/sorting';
-import { updateItem } from '../utills/array';
+import Model from '../../shared/model';
+import { getRandomRouteMock } from '../../mock/route';
+import { SortingTypes } from '../../config/sorting-types';
+import { sortingTypeByFunction } from '../../utills/sorting';
+import { updateItem } from '../../utills/array';
 
 /**
  * RouteModel
@@ -35,7 +35,7 @@ export default class RouteModel extends Model {
      * @param { RoutePointData } current
      * @returns { boolean }
      */
-    const routeCompareFunction = (current) => current.id !== routePoint.id;
+    const routeCompareFunction = (current) => current.id === routePoint.id;
     this.data = updateItem(this.data, routePoint, routeCompareFunction);
   }
 
@@ -124,9 +124,9 @@ export default class RouteModel extends Model {
  */
 
 /**
- * @typedef { import('../config/route-points-types').RoutePointsTypes } RoutePointsTypes
+ * @typedef { import('../../config/route-points-types').RoutePointsTypes } RoutePointsTypes
  */
 
 /**
- * @typedef { import('../utills/filter').FilterTypeByFunction } FilterTypeByFunction
+ * @typedef { import('../../utills/filter').FilterTypeByFunction } FilterTypeByFunction
  */
