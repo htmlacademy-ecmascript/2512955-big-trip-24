@@ -81,12 +81,6 @@ export default class EditEventFormView extends AbstractStatefulView {
     });
   };
 
-  removeElement() {
-    this.#dateFromPicker?.destroy();
-    this.#dateToPicker?.destroy();
-    super.removeElement();
-  }
-
   /**
    * Event type change handler
    * @param { Event } event
@@ -159,6 +153,7 @@ export default class EditEventFormView extends AbstractStatefulView {
     if (dates.length === DATES_RANGE_LENGTH) {
       const [date] = dates;
       const stateField = instance === this.#dateFromPicker ? 'dateFrom' : 'dateTo';
+      date.setMilliseconds(new Date(this._state[stateField]).getMilliseconds());
       const utcDateValue = flatpickrDateToUTCDate(date).toISOString();
       if (this._state[stateField] !== utcDateValue) {
         this.updateElement({
@@ -169,6 +164,8 @@ export default class EditEventFormView extends AbstractStatefulView {
   };
 
   _restoreHandlers() {
+    this.#setFlatPickers();
+
     this.element.addEventListener('submit', this.#submitFormHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
 
@@ -183,6 +180,11 @@ export default class EditEventFormView extends AbstractStatefulView {
     }
 
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#priceInputBlurHandler);
+  }
+
+  #setFlatPickers() {
+    this.#dateFromPicker?.destroy();
+    this.#dateToPicker?.destroy();
 
     this.#dateToPicker = flatpickr(
       this.element.querySelector(`#event-end-time-${this._state.id}`),
