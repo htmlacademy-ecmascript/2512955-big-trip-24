@@ -71,7 +71,7 @@ const getPointTimeLineTemplate = ({ dateFrom, dateTo, id }) => {
       <input class="event__input  event__input--time" id="event-start-time-${ id }" type="text" name="event-start-time" value="${ eventBeginValue }">
       &mdash;
       <label class="visually-hidden" for="event-end-time-${ id }">To</label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${ eventEndValue }">
+      <input class="event__input  event__input--time" id="event-end-time-${ id }" type="text" name="event-end-time" value="${ eventEndValue }">
     </div>`;
 };
 

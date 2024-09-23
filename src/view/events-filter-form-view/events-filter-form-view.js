@@ -57,5 +57,5 @@ export default class EventsFilterFormView extends AbstractView {
  */
 
 /**
- * @typedef { import('../../model/route-model').RouteCountsByFiltersInfo } RouteCountsByFiltersInfo
+ * @typedef { import('../../model/route-model/route-model').RouteCountsByFiltersInfo } RouteCountsByFiltersInfo
  */

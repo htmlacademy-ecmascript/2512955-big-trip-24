@@ -3,6 +3,8 @@ import RouteModel from '../model/route-model';
 import OfferModel from '../model/offer-model';
 import RouteDestinationModel from '../model/route-destination-model';
 
+import 'flatpickr/dist/flatpickr.min.css';
+
 /**
  * Application startup class
  * @static

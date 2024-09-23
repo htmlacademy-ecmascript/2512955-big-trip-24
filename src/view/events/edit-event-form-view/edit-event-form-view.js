@@ -1,13 +1,23 @@
 import AbstractStatefulView from '../../../framework/view/abstract-stateful-view';
 import { getEditEventTemplate } from './template';
-import { OFFER_INPUT_NAME } from './const';
+import { OFFER_INPUT_NAME, DATES_RANGE_LENGTH, DEFAULT_PARSE_RADIX } from './const';
+import flatpickr from 'flatpickr';
+import { DateFormats } from '../../../config/date-format';
+import { flatpickrUTCDateParser, flatpickrDateToUTCDate } from '../../../utills/time';
 
 /**
  * @extends AbstractStatefulView
  */
 export default class EditEventFormView extends AbstractStatefulView {
   #isNewEvent = false;
-
+  /**
+   * @type { FlatpickrInstance }
+   */
+  #dateFromPicker = null;
+  /**
+   * @type { FlatpickrInstance }
+   */
+  #dateToPicker = null;
   /**
    * @type { GetOffersCallback }
    */
@@ -19,9 +29,9 @@ export default class EditEventFormView extends AbstractStatefulView {
   #onRollupButtonClickCallback = null;
 
   /**
-   * @type { OnSaveButtonClickCallback }
+   * @type { OnSubmitCallback }
    */
-  #onSaveButtonClickCallback = null;
+  #onSubmitCallback = null;
 
   /**
    * EditEventFormView constructor
@@ -32,10 +42,10 @@ export default class EditEventFormView extends AbstractStatefulView {
     getOffers,
     getDestinations,
     onRollupButtonClick,
-    onSaveButtonClick
+    onSubmit
   }) {
     super();
-    this.#onSaveButtonClickCallback = onSaveButtonClick;
+    this.#onSubmitCallback = onSubmit;
     this.#getOffersCallback = getOffers;
     this._setState(EditEventFormView.convertDataToState(routePoint, getOffers(routePoint.type), getDestinations()));
     this.#isNewEvent = !(routePoint.id && onRollupButtonClick);
@@ -43,6 +53,7 @@ export default class EditEventFormView extends AbstractStatefulView {
     if (!this.#isNewEvent) {
       this.#onRollupButtonClickCallback = onRollupButtonClick;
     }
+
     this._restoreHandlers();
   }
 
@@ -54,7 +65,7 @@ export default class EditEventFormView extends AbstractStatefulView {
    * Event destination change handler
    * @param { Event } event
    */
-  #onDestinationSelect = (event) => {
+  #destinationSelectHandler = (event) => {
     const destinationName = event.target?.value?.toLowerCase();
 
     let findedDestination = this._state
@@ -70,11 +81,17 @@ export default class EditEventFormView extends AbstractStatefulView {
     });
   };
 
+  removeElement() {
+    this.#dateFromPicker?.destroy();
+    this.#dateToPicker?.destroy();
+    super.removeElement();
+  }
+
   /**
    * Event type change handler
    * @param { Event } event
    */
-  #onEventTypeChange = (event) => {
+  #eventTypeChangeHandler = (event) => {
     event.preventDefault();
     const newEventType = event.target?.value ?? this._state.type;
 
@@ -91,21 +108,32 @@ export default class EditEventFormView extends AbstractStatefulView {
    * Submit form handler
    * @param { SubmitEvent } event
    */
-  #onSubmitForm = (event) => {
+  #submitFormHandler = (event) => {
     event.preventDefault();
-    this.#onSaveButtonClickCallback();
+    this.#onSubmitCallback(EditEventFormView.convertStateToData(this._state));
   };
 
   /**
    * Close element click handler
    * @param { Event } event
    */
-  #onRollupButtonClick = (event) => {
+  #rollupButtonClickHandler = (event) => {
     event.preventDefault();
     this.#onRollupButtonClickCallback();
   };
 
-  #onOfferInputChange = (event) => {
+  #priceInputBlurHandler = (event) => {
+    event.preventDefault();
+    const newPrice = Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX);
+
+    if (!Number.isNaN(newPrice)) {
+      this.updateElement({
+        basePrice: newPrice
+      });
+    }
+  };
+
+  #offerInputChangeHandler = (event) => {
     event.preventDefault();
     const element = event.target;
 
@@ -121,15 +149,68 @@ export default class EditEventFormView extends AbstractStatefulView {
     }
   };
 
-  _restoreHandlers() {
-    this.element.addEventListener('submit', this.#onSubmitForm);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeChange);
-
-    this.element.querySelector('.event__input--destination').addEventListener('blur', this.#onDestinationSelect);
-    this.element.querySelector('.event__section--offers').addEventListener('change', this.#onOfferInputChange);
-    if (!this.#isNewEvent) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollupButtonClick);
+  /**
+   * Dates change handler
+   * @param { Date[] } dates - Selected dates
+   * @param { string } _representation - Flatpickr default dates serializing
+   * @param { FlatpickrInstance } instance - Flatpickr object
+   */
+  #dateSelectHandler = (dates, _representation, instance) => {
+    if (dates.length === DATES_RANGE_LENGTH) {
+      const [date] = dates;
+      const stateField = instance === this.#dateFromPicker ? 'dateFrom' : 'dateTo';
+      const utcDateValue = flatpickrDateToUTCDate(date).toISOString();
+      if (this._state[stateField] !== utcDateValue) {
+        this.updateElement({
+          [stateField]: utcDateValue,
+        });
+      }
     }
+  };
+
+  _restoreHandlers() {
+    this.element.addEventListener('submit', this.#submitFormHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
+
+    this.element.querySelector('.event__input--destination').addEventListener('blur', this.#destinationSelectHandler);
+
+    if (this._state.fullOffers?.length ?? 0 > 0) {
+      this.element.querySelector('.event__section--offers').addEventListener('change', this.#offerInputChangeHandler);
+    }
+
+    if (!this.#isNewEvent) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupButtonClickHandler);
+    }
+
+    this.element.querySelector('.event__input--price').addEventListener('blur', this.#priceInputBlurHandler);
+
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector(`#event-end-time-${this._state.id}`),
+      {
+        onClose: this.#dateSelectHandler,
+        dateFormat: DateFormats.FLATPICKR_FORMAT,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        parseDate: flatpickrUTCDateParser,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        enableTime: true,
+      }
+    );
+
+    this.#dateFromPicker = flatpickr(
+      this.element.querySelector(`#event-start-time-${this._state.id}`),
+      {
+        onClose: this.#dateSelectHandler,
+        dateFormat: DateFormats.FLATPICKR_FORMAT,
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo,
+        parseDate: flatpickrUTCDateParser,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        enableTime: true
+      }
+    );
   }
 
   /**
@@ -170,7 +251,7 @@ export default class EditEventFormView extends AbstractStatefulView {
  * @property { GetOffersCallback } EditFormViewConstructorParams.getOffers
  * @property { GetDestinationsCallback } EditFormViewConstructorParams.getDestinations
  * @property { OnRollupButtonClickCallback } [EditFormViewConstructorParams.onRollupButtonClick=null]
- * @property { OnSaveButtonClickCallback } EditFormViewConstructorParams.onSaveButtonClick
+ * @property { OnSubmitCallback } EditFormViewConstructorParams.onSubmit
  */
 
 /**
@@ -200,7 +281,8 @@ export default class EditEventFormView extends AbstractStatefulView {
  */
 
 /**
- * @callback OnSaveButtonClickCallback
+ * @callback OnSubmitCallback
+ * @param { RoutePointDto } routePoint
  * @returns { void }
  */
 
@@ -218,4 +300,8 @@ export default class EditEventFormView extends AbstractStatefulView {
 
 /**
  * @typedef { import('../../../service/data-transfer-object-service').RoutePointDto } RoutePointDto
+ */
+
+/**
+ * @typedef { import('flatpickr/dist/types/instance').Instance } FlatpickrInstance
  */

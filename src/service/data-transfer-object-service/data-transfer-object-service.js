@@ -162,7 +162,7 @@ export default class DataTransferObjectService {
  */
 
 /**
- * @typedef { import('../../model/route-model').RoutePointData } RoutePointData
+ * @typedef { import('../../model/route-model/route-model').RoutePointData } RoutePointData
  */
 
 /**
@@ -170,7 +170,7 @@ export default class DataTransferObjectService {
  */
 
 /**
- * @typedef { import('../../model/route-model').FullRouteInfo } FullRouteInfo
+ * @typedef { import('../../model/route-model/route-model').FullRouteInfo } FullRouteInfo
  */
 
 /**
