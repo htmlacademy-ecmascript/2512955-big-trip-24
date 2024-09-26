@@ -1,10 +1,13 @@
 import Presenter from '../shared/presenter';
 import RouteInfoView from '../view/route-info-view';
 import {
+  remove,
   render,
-  RenderPosition
+  RenderPosition,
+  replace
 } from '../framework/render';
 import DataTransferObjectService from '../service/data-transfer-object-service';
+import { ModelActions } from '../service/actions';
 
 export default class HeaderPresenter extends Presenter {
   /**
@@ -25,7 +28,21 @@ export default class HeaderPresenter extends Presenter {
   constructor({ headerRootElement, ...presenterParams }) {
     super(presenterParams);
     this.#rootElement = headerRootElement;
+    this._routeModel.addObserver(this.#handleRoutePointModelActions);
   }
+
+  /**
+   * @param { ModelActions } actionType
+   */
+  #handleRoutePointModelActions = (actionType) => {
+    switch(actionType) {
+      case ModelActions.MINOR_UPDATE:
+      case ModelActions.MAJOR_UPDATE: {
+        this.#renderViews();
+        break;
+      }
+    }
+  };
 
   #renderViews() {
     const routeTotalInfo = DataTransferObjectService.getFullRouteInfoDto(
@@ -35,8 +52,21 @@ export default class HeaderPresenter extends Presenter {
     );
 
     if (routeTotalInfo) {
-      this.#routeInfoView = new RouteInfoView({ data: routeTotalInfo });
-      render(this.#routeInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
+      const newRouteInfoView = new RouteInfoView({ data: routeTotalInfo });
+      if (this.#routeInfoView) {
+        replace(newRouteInfoView, this.#routeInfoView);
+        remove(this.#routeInfoView);
+      } else {
+        render(newRouteInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
+      }
+
+      this.#routeInfoView = newRouteInfoView;
+
+      return;
+    }
+
+    if (this.#routeInfoView) {
+      remove(this.#routeInfoView);
     }
   }
 
@@ -57,4 +87,8 @@ export default class HeaderPresenter extends Presenter {
 
 /**
  * @typedef { PresenterConstructorParams & HeaderPresenterAdditionalParams } HeaderPresenterConstructorParams
+ */
+
+/**
+ * @typedef { import('../service/actions').ModelActions } ModelActions
  */

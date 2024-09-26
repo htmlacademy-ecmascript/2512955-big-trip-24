@@ -1,12 +1,12 @@
-import Model from '../../shared/model';
-import { getRandomRouteMock } from '../../mock/route';
-import { SortingTypes } from '../../config/sorting-types';
-import { sortingTypeByFunction } from '../../utills/sorting';
-import { updateItem } from '../../utills/array';
+import Model from '../shared/model';
+import { getRandomRouteMock } from '../mock/route';
+import { SortingTypes } from '../config/sorting-types';
+import { sortingTypeByFunction } from '../utills/sorting';
+import { updateItem } from '../utills/array';
 
 /**
  * RouteModel
- * @extends Model<RoutePointData>
+ * @extends Model<RoutePointData[]>
  */
 export default class RouteModel extends Model {
   constructor() {
@@ -27,16 +27,38 @@ export default class RouteModel extends Model {
   }
 
   /**
-   * Update existed route point
+   * Delete route point
+   * @param { ModelActions } modelActionType
    * @param { RoutePointData } routePoint
    */
-  updateRoutePoint(routePoint) {
+  deleteRoutePoint(modelActionType, routePoint) {
+    this.data = this.data.filter((current) => current.id !== routePoint.id);
+    this._notify(modelActionType, routePoint);
+  }
+
+  /**
+   * Add new route point
+   * @param { ModelActions } modelActionType
+   * @param { RoutePointData } routePoint
+   */
+  addNewRoutePoint(modelActionType, routePoint) {
+    this.data = [...this.data, routePoint];
+    this._notify(modelActionType, routePoint);
+  }
+
+  /**
+   * Update existed route point
+   * @param { RoutePointData } routePoint
+   * @param { ModelActions } modelActionType
+   */
+  updateRoutePoint(modelActionType, routePoint) {
     /**
      * @param { RoutePointData } current
      * @returns { boolean }
      */
     const routeCompareFunction = (current) => current.id === routePoint.id;
     this.data = updateItem(this.data, routePoint, routeCompareFunction);
+    this._notify(modelActionType, routePoint);
   }
 
   /**
@@ -56,21 +78,21 @@ export default class RouteModel extends Model {
         offers: [],
         routeDateTo: sortedData[sortedData.length - 1].date_from,
         routeDateFrom: sortedData[0].date_from,
-        middleDestinationIds: []
+        destinationIds: []
       };
 
       return sortedData.reduce((accum, current) => {
-        const newMiddleDestinations = [...accum.middleDestinationIds];
+        const destinationIds = [...accum.destinationIds];
 
-        if (!newMiddleDestinations.find((destination) => current.destination === destination)) {
-          newMiddleDestinations.push(current.destination);
+        if (!destinationIds.find((destination) => current.destination === destination)) {
+          destinationIds.push(current.destination);
         }
 
         return {
           ...accum,
           totalBasePrice: accum.totalBasePrice + current.base_price,
           offers: [...accum.offers, ...(current.offers ?? [])],
-          middleDestinationIds: newMiddleDestinations
+          destinationIds: destinationIds
         };
       }, result);
     }
@@ -124,9 +146,13 @@ export default class RouteModel extends Model {
  */
 
 /**
- * @typedef { import('../../config/route-points-types').RoutePointsTypes } RoutePointsTypes
+ * @typedef { import('../config/route-points-types').RoutePointsTypes } RoutePointsTypes
  */
 
 /**
- * @typedef { import('../../utills/filter').FilterTypeByFunction } FilterTypeByFunction
+ * @typedef { import('../utills/filter').FilterTypeByFunction } FilterTypeByFunction
+ */
+
+/**
+ * @typedef { import('../service/actions').ModelActions } ModelActions
  */

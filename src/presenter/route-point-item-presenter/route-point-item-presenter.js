@@ -6,7 +6,7 @@ import EventInfoView from '../../view/events/event-info-view';
 import DataTransferObjectService from '../../service/data-transfer-object-service';
 import AbstractView from '../../framework/view/abstract-view';
 import { EventsListItemView } from '../../view/events-list-view';
-import { EventTypes } from '../../model/route-model';
+import { ModelActions, UserActions } from '../../service/actions';
 
 export default class RoutePointItemPresenter extends Presenter {
   /**
@@ -31,19 +31,19 @@ export default class RoutePointItemPresenter extends Presenter {
   #rollupButtonClickCallback = null;
 
   /**
-   * @type { OnDataChangeCallback }
+   * @type { RouteModelDispatch }
    */
-  #dataChangeCallback = null;
+  #routeModelDispatch = null;
 
   /**
    * Presenter constructor
    * @param { RoutePointItemConstructorParams } presenterParams
    */
-  constructor({ rootElement, routePoint, onRollupClick, onDataChange, ...presenterParams }) {
+  constructor({ rootElement, routePoint, routeModelDispatch, onRollupClick, ...presenterParams }) {
     super(presenterParams);
     this.#rootElement = rootElement;
     this.#routePoint = routePoint;
-    this.#dataChangeCallback = onDataChange;
+    this.#routeModelDispatch = routeModelDispatch;
     this.#rollupButtonClickCallback = onRollupClick;
   }
 
@@ -61,13 +61,14 @@ export default class RoutePointItemPresenter extends Presenter {
    */
   #renderView(view) {
     if (view instanceof AbstractView) {
+      const listItemView = this.#asEventListItem(view);
       if (this.#itemView) {
-        replace(view, this.#itemView);
+        replace(listItemView, this.#itemView);
         remove(this.#itemView);
       } else {
-        render(this.#asEventListItem(view), this.#rootElement);
+        render(listItemView, this.#rootElement);
       }
-      this.#itemView = view;
+      this.#itemView = listItemView;
     }
   }
 
@@ -94,11 +95,24 @@ export default class RoutePointItemPresenter extends Presenter {
   }
 
   /**
+   * Delete route point
+   * @param { RoutePointDto } routePoint
+   */
+  #deleteButtonClickHandler = (routePoint) => {
+    this.#routeModelDispatch(
+      UserActions.DELETE_POINT,
+      ModelActions.MINOR_UPDATE,
+      routePoint
+    );
+  };
+
+  /**
    * Favorite change
    */
   #favoriteButtonClickHandler = () => {
-    this.#dataChangeCallback(
-      EventTypes.MINOR_ITEM_UPDATE,
+    this.#routeModelDispatch(
+      UserActions.UPDATE_POINT,
+      ModelActions.PATCH,
       {
         ...this.#routePoint,
         isFavorite: !this.#routePoint.isFavorite
@@ -106,16 +120,29 @@ export default class RoutePointItemPresenter extends Presenter {
     );
   };
 
+
   /**
    * Submit route point changes
    * @param { RoutePointDto } routePointDto
    */
   #editFormSubmitHandler = (routePointDto) => {
-    this.#dataChangeCallback(
-      EventTypes.MAJOR_ITEM_UPDATE,
+    this.#routeModelDispatch(
+      UserActions.UPDATE_POINT,
+      this.#getModelActionTypeByUpdateRoutePointAction(routePointDto),
       routePointDto
     );
   };
+
+  /**
+   * Optimize rerenders
+   * @param { RoutePointDto } routePointDto
+   */
+  #getModelActionTypeByUpdateRoutePointAction(routePointDto) {
+    const isDatesNotEquals = routePointDto.dateFrom !== this.#routePoint.dateFrom || routePointDto.dateTo !== this.#routePoint.dateTo;
+    const isPriceNotEquals = routePointDto.basePrice !== this.#routePoint.basePrice;
+
+    return isDatesNotEquals || isPriceNotEquals ? ModelActions.MAJOR_UPDATE : ModelActions.MINOR_UPDATE;
+  }
 
   /**
    * Create edit view by this.#routePoint
@@ -131,7 +158,8 @@ export default class RoutePointItemPresenter extends Presenter {
       onRollupButtonClick: () => {
         this.#replaceEditViewToInfoView();
       },
-      onSubmit: this.#editFormSubmitHandler
+      onSubmit: this.#editFormSubmitHandler,
+      onDeleteButtonClick: this.#deleteButtonClickHandler
     });
   }
 
@@ -149,6 +177,14 @@ export default class RoutePointItemPresenter extends Presenter {
       },
       onFavoriteButtonClickCallback: this.#favoriteButtonClickHandler
     });
+  }
+
+  /**
+   * Destroy presenter and view
+   */
+  destroy() {
+    remove(this.#itemView);
+    this.#itemView = null;
   }
 
   /**
@@ -211,11 +247,15 @@ export default class RoutePointItemPresenter extends Presenter {
  * @property { RoutePointDto } RoutePountPresenterAdditionalParams.routePoint
  * @property { HTMLElement } RoutePountPresenterAdditionalParams.rootElement
  * @property { () => void } RoutePountPresenterAdditionalParams.onRollupClick
- * @property { OnDataChangeCallback } RoutePountPresenterAdditionalParams.onDataChange
+ * @property { RouteModelDispatch } RoutePountPresenterAdditionalParams.routeModelDispatch
  */
 
 /**
- * @typedef { import('../../model/route-model').EventTypes } EventTypes
+ * @typedef { import('../../service/actions').UserActions } UserActions
+ */
+
+/**
+ * @typedef { import('../../service/actions').ModelActions } ModelActions
  */
 
 /**
@@ -223,9 +263,10 @@ export default class RoutePointItemPresenter extends Presenter {
  */
 
 /**
- * @callback OnDataChangeCallback
- * @param { EventTypes } eventType
- * @param { RoutePointDto } DataTransferObjectService
+ * @callback RouteModelDispatch
+ * @param { UserActions } userAction
+ * @param { ModelActions } modelActionType
+ * @param { RoutePointDto } data
  * @returns { void }
  */
 

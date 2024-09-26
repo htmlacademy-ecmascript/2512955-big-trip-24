@@ -28,16 +28,18 @@ export default class RootPresenter extends Presenter {
 
   /**
    * Presenter constructor
-   * @param { PresenterConstructorParams } presenterConstructorParams
+   * @param { PresenterConstructorParams } params
    */
-  constructor(presenterConstructorParams) {
+  constructor({ sortModel, filterModel, ...presenterConstructorParams}) {
     super(presenterConstructorParams);
     this.#routeListPresenter = new RouteListPresenter({
       ...presenterConstructorParams,
       rootElement: tripEventsElement,
       headerRootElement: tripMainElement,
-      showMessage: this.#renderMessage,
-      destroyMessageView: this.#destroyMessageView
+      showMessageCallback: this.#renderMessage,
+      destroyMessageView: this.#destroyMessageView,
+      filterModel,
+      sortModel
     });
     this.#headerPresenter = new HeaderPresenter({
       ...presenterConstructorParams,
@@ -91,9 +93,24 @@ export default class RootPresenter extends Presenter {
 }
 
 /**
- * @typedef { import('../shared/presenter').PresenterConstructorParams } PresenterConstructorParams
+ * @typedef { import('../shared/presenter').PresenterConstructorParams } BasePresenterConstructorParams
  */
 
 /**
- * @typedef { PresenterConstructorParams & { showMessage: (message: string) => void } }
+ * @typedef { import('../model/fliter-model').default } FilterModel
+ */
+
+/**
+ * @typedef { import('../model/sort-model').default } SortModel
+ */
+
+/**
+ * @typedef { Object } PresenterConstructorAdditionalParams
+ * @property { FilterModel } PresenterConstructorAdditionalParams.filterModel
+ * @property { SortModel } PresenterConstructorAdditionalParams.sortModel
+ * @property { (message: string) => void } PresenterConstructorAdditionalParams.showMessage
+ */
+
+/**
+ * @typedef { BasePresenterConstructorParams & PresenterConstructorAdditionalParams } PresenterConstructorParams
  */
