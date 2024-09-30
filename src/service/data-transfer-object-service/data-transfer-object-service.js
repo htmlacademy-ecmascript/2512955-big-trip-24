@@ -107,7 +107,7 @@ export default class DataTransferObjectService {
     if (routeTotals) {
       const dateFrom = routeTotals.routeDateFrom;
       const dateTo = routeTotals.routeDateTo;
-      const destinationNames = routeTotals.middleDestinationIds.map((current) => destinations.find((destination) => destination.id === current)?.name);
+      const destinationNames = routeTotals.destinationIds.map((current) => destinations.find((destination) => destination.id === current)?.name);
       return {
         dateFrom,
         dateTo,

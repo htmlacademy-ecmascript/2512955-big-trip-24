@@ -1,8 +1,11 @@
+import Observable from '../framework/observable';
+import EncodeService from '../service/encode-service';
+
 /**
  * Model parent abstract class
  * @template TModelData
  */
-export default class Model {
+export default class Model extends Observable {
   /**
    * Model data
    * @type { TModelData }
@@ -20,6 +23,7 @@ export default class Model {
    * @param { ConstructorParams<TModelData> } constructorParams
    */
   constructor({ defaultData }) {
+    super();
     if (new.target === Model) {
       throw new Error('Model is Abstract class!!');
     }
@@ -28,12 +32,12 @@ export default class Model {
   }
 
   get data() {
-    return this.#data ?? this.#defaultData;
+    return EncodeService.encode(structuredClone(this.#data ?? this.#defaultData));
   }
 
   /**
    * Protected setter model data
-   * @param { TModelData[] } value
+   * @param { TModelData } value
    * @protected
    */
   set data(value) {
@@ -72,4 +76,8 @@ export default class Model {
  * _fetchData params
  * @template TModelData
  * @typedef { { fetchFn: () => Promise<TModelData> } } FetchDataParams
+ */
+
+/**
+ * @typedef { import('../service/actions').ModelActions } ModelActions
  */

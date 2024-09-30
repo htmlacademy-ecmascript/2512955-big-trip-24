@@ -1,6 +1,6 @@
 import { getRandomElementInArray } from '../utills/random';
 
-const MAX_POINTS_COUNT = 6;
+const MAX_POINTS_COUNT = 5;
 /**
  * Route points mock
  * @constant
@@ -328,13 +328,16 @@ const ROUTE_POINTS = JSON.parse(`[
  * @returns { RoutePointData[] }
  */
 export const getRandomRouteMock = async (pointsCount = MAX_POINTS_COUNT) => {
-  const route = [];
+  const route = new Map();
 
-  for (let pointIndex = 0; pointIndex < pointsCount; pointIndex++) {
-    route.push(structuredClone(getRandomElementInArray(ROUTE_POINTS)));
+  while (route.size !== pointsCount) {
+    const item = getRandomElementInArray(ROUTE_POINTS);
+    if (!route.has(item.id)) {
+      route.set(item.id, item);
+    }
   }
 
-  return route;
+  return Array.from(route.values());
 };
 
 /**

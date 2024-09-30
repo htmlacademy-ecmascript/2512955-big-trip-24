@@ -1,12 +1,29 @@
-import Presenter from '../shared/presenter';
 import RouteInfoView from '../view/route-info-view';
 import {
+  remove,
   render,
-  RenderPosition
+  RenderPosition,
+  replace
 } from '../framework/render';
 import DataTransferObjectService from '../service/data-transfer-object-service';
+import { ModelActions } from '../service/actions';
 
-export default class HeaderPresenter extends Presenter {
+export default class HeaderPresenter {
+  /**
+   * @type { OfferModel }
+   */
+  #offerModel = null;
+
+  /**
+   * @type { RouteDestinationModel }
+   */
+  #destinationModel = null;
+
+  /**
+   * @type { RouteModel }
+   */
+  #routeModel = null;
+
   /**
    * @type { RouteInfoView }
    */
@@ -20,23 +37,53 @@ export default class HeaderPresenter extends Presenter {
 
   /**
    * Header presenter constructor
-   * @param { HeaderPresenterConstructorParams } presenterParams
+   * @param { HeaderPresenterParams } presenterParams
    */
-  constructor({ headerRootElement, ...presenterParams }) {
-    super(presenterParams);
+  constructor({ headerRootElement, routeModel, destinationModel, offerModel }) {
     this.#rootElement = headerRootElement;
+    this.#routeModel = routeModel;
+    this.#offerModel = offerModel;
+    this.#destinationModel = destinationModel;
+    this.#routeModel.addObserver(this.#handleRoutePointModelActions);
   }
+
+  /**
+   * @param { ModelActions } actionType
+   */
+  #handleRoutePointModelActions = (actionType) => {
+    switch(actionType) {
+      case ModelActions.MINOR_UPDATE:
+      case ModelActions.MAJOR_UPDATE: {
+        this.#renderViews();
+        break;
+      }
+    }
+  };
 
   #renderViews() {
     const routeTotalInfo = DataTransferObjectService.getFullRouteInfoDto(
-      this._routeModel.getFullRouteInfo(),
-      this._offerModel.getAllOffers(),
-      this._routeDestinationModel.data
+      this.#routeModel.getFullRouteInfo(),
+      this.#offerModel.getAllOffers(),
+      this.#destinationModel.data
     );
 
     if (routeTotalInfo) {
-      this.#routeInfoView = new RouteInfoView({ data: routeTotalInfo });
-      render(this.#routeInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
+      const newRouteInfoView = new RouteInfoView({ data: routeTotalInfo });
+      if (this.#routeInfoView) {
+        replace(newRouteInfoView, this.#routeInfoView);
+        remove(this.#routeInfoView);
+      } else {
+        render(newRouteInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
+      }
+
+      this.#routeInfoView = newRouteInfoView;
+
+      return;
+    }
+
+    if (this.#routeInfoView) {
+      remove(this.#routeInfoView);
+      this.#routeInfoView = null;
     }
   }
 
@@ -46,15 +93,26 @@ export default class HeaderPresenter extends Presenter {
 }
 
 /**
- * @typedef { import('../shared/presenter').PresenterConstructorParams } PresenterConstructorParams
+ * @typedef { import('../model/route-model').default } RouteModel
  */
 
 /**
- * @typedef { Object } HeaderPresenterAdditionalParams
- * @property { HTMLElement } eventsListRootElement
- * @property { HTMLElement } headerRootElement
+ * @typedef { import('../model/offer-model').default } OfferModel
  */
 
 /**
- * @typedef { PresenterConstructorParams & HeaderPresenterAdditionalParams } HeaderPresenterConstructorParams
+ * @typedef { import('../model/route-destination-model').default } RouteDestinationModel
+ */
+
+
+/**
+ * @typedef { Object } HeaderPresenterParams
+ * @property { HTMLElement } HeaderPresenterParams.headerRootElement
+ * @property { RouteModel } HeaderPresenterParams.routeModel
+ * @property { OfferModel } HeaderPresenterParams.offerModel
+ * @property { RouteDestinationModel } HeaderPresenterParams.destinationModel
+ */
+
+/**
+ * @typedef { import('../service/actions').ModelActions } ModelActions
  */

@@ -1,14 +1,14 @@
-import AbstractStatefulView from '../../../framework/view/abstract-stateful-view';
 import { getEditEventTemplate } from './template';
 import { OFFER_INPUT_NAME, DATES_RANGE_LENGTH, DEFAULT_PARSE_RADIX } from './const';
 import flatpickr from 'flatpickr';
 import { DateFormats } from '../../../config/date-format';
 import { flatpickrUTCDateParser, flatpickrDateToUTCDate } from '../../../utills/time';
+import EncodedStatefulView from '../../../shared/encoded-stateful-view';
 
 /**
  * @extends AbstractStatefulView
  */
-export default class EditEventFormView extends AbstractStatefulView {
+export default class EditEventFormView extends EncodedStatefulView {
   #isNewEvent = false;
   /**
    * @type { FlatpickrInstance }
@@ -34,6 +34,11 @@ export default class EditEventFormView extends AbstractStatefulView {
   #onSubmitCallback = null;
 
   /**
+   * @type { OnDeleteCallback }
+   */
+  #onDeleteCallback = null;
+
+  /**
    * EditEventFormView constructor
    * @param { EditFormViewConstructorParams } params
    */
@@ -42,11 +47,13 @@ export default class EditEventFormView extends AbstractStatefulView {
     getOffers,
     getDestinations,
     onRollupButtonClick,
-    onSubmit
+    onSubmit,
+    onDelete
   }) {
     super();
     this.#onSubmitCallback = onSubmit;
     this.#getOffersCallback = getOffers;
+    this.#onDeleteCallback = onDelete;
     this._setState(EditEventFormView.convertDataToState(routePoint, getOffers(routePoint.type), getDestinations()));
     this.#isNewEvent = !(routePoint.id && onRollupButtonClick);
 
@@ -81,12 +88,6 @@ export default class EditEventFormView extends AbstractStatefulView {
     });
   };
 
-  removeElement() {
-    this.#dateFromPicker?.destroy();
-    this.#dateToPicker?.destroy();
-    super.removeElement();
-  }
-
   /**
    * Event type change handler
    * @param { Event } event
@@ -105,12 +106,22 @@ export default class EditEventFormView extends AbstractStatefulView {
   };
 
   /**
+   * @param { Event } event
+   */
+  #deleteButtonClickHandler = (event) => {
+    event.preventDefault();
+    this.#onDeleteCallback(EditEventFormView.convertStateToData(this._state));
+    this.#destroyFlatPickers();
+  };
+
+  /**
    * Submit form handler
    * @param { SubmitEvent } event
    */
   #submitFormHandler = (event) => {
     event.preventDefault();
     this.#onSubmitCallback(EditEventFormView.convertStateToData(this._state));
+    this.#destroyFlatPickers();
   };
 
   /**
@@ -120,17 +131,14 @@ export default class EditEventFormView extends AbstractStatefulView {
   #rollupButtonClickHandler = (event) => {
     event.preventDefault();
     this.#onRollupButtonClickCallback();
+    this.#destroyFlatPickers();
   };
 
   #priceInputBlurHandler = (event) => {
     event.preventDefault();
-    const newPrice = Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX);
-
-    if (!Number.isNaN(newPrice)) {
-      this.updateElement({
-        basePrice: newPrice
-      });
-    }
+    this.updateElement({
+      basePrice: /^\d*$/.test(event.target.value) ? Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX) : this._state.basePrice
+    });
   };
 
   #offerInputChangeHandler = (event) => {
@@ -159,6 +167,7 @@ export default class EditEventFormView extends AbstractStatefulView {
     if (dates.length === DATES_RANGE_LENGTH) {
       const [date] = dates;
       const stateField = instance === this.#dateFromPicker ? 'dateFrom' : 'dateTo';
+      date.setMilliseconds(new Date(this._state[stateField]).getMilliseconds());
       const utcDateValue = flatpickrDateToUTCDate(date).toISOString();
       if (this._state[stateField] !== utcDateValue) {
         this.updateElement({
@@ -169,6 +178,8 @@ export default class EditEventFormView extends AbstractStatefulView {
   };
 
   _restoreHandlers() {
+    this.#setFlatPickers();
+
     this.element.addEventListener('submit', this.#submitFormHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
 
@@ -183,7 +194,16 @@ export default class EditEventFormView extends AbstractStatefulView {
     }
 
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#priceInputBlurHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteButtonClickHandler);
+  }
 
+  #destroyFlatPickers() {
+    this.#dateFromPicker?.destroy();
+    this.#dateToPicker?.destroy();
+  }
+
+  #setFlatPickers() {
+    this.#destroyFlatPickers();
     this.#dateToPicker = flatpickr(
       this.element.querySelector(`#event-end-time-${this._state.id}`),
       {
@@ -252,6 +272,7 @@ export default class EditEventFormView extends AbstractStatefulView {
  * @property { GetDestinationsCallback } EditFormViewConstructorParams.getDestinations
  * @property { OnRollupButtonClickCallback } [EditFormViewConstructorParams.onRollupButtonClick=null]
  * @property { OnSubmitCallback } EditFormViewConstructorParams.onSubmit
+ * @property { OnDeleteCallback } EditFormViewConstructorParams.onDelete
  */
 
 /**
@@ -282,6 +303,12 @@ export default class EditEventFormView extends AbstractStatefulView {
 
 /**
  * @callback OnSubmitCallback
+ * @param { RoutePointDto } routePoint
+ * @returns { void }
+ */
+
+/**
+ * @callback OnDeleteCallback
  * @param { RoutePointDto } routePoint
  * @returns { void }
  */

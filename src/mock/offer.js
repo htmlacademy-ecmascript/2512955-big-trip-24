@@ -10,27 +10,27 @@ const OFFERS = JSON.parse(
     "offers": [
       {
         "id": "d2941105-a655-426f-a40f-d482483a0f14",
-        "title": "Upgrade to a business class",
+        "title": "<h1>Upgrade to a business class</h1>",
         "price": 86
       },
       {
         "id": "c13277fa-5487-42c8-a64a-c2da79d1d0b8",
-        "title": "Choose the radio station",
+        "title": "<h1>Choose the radio station</h1>",
         "price": 47
       },
       {
         "id": "25767bb6-241f-48bc-8ef8-8104d4392d26",
-        "title": "Choose temperature",
+        "title": "<h1>Choose temperature</h1>",
         "price": 33
       },
       {
         "id": "6972c573-f47b-4325-a582-e1cf73e35958",
-        "title": "Drive quickly, I'm in a hurry",
+        "title": "<h1>Drive quickly, I'm in a hurry</h1>",
         "price": 144
       },
       {
         "id": "2b5b3ae7-1305-4b36-a99d-db2dab930120",
-        "title": "Drive slowly",
+        "title": "<h1>Drive slowly</h1>",
         "price": 199
       }
     ]
