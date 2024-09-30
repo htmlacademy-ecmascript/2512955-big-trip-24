@@ -159,7 +159,7 @@ export default class RoutePointItemPresenter extends Presenter {
         this.#replaceEditViewToInfoView();
       },
       onSubmit: this.#editFormSubmitHandler,
-      onDeleteButtonClick: this.#deleteButtonClickHandler
+      onDelete: this.#deleteButtonClickHandler
     });
   }
 

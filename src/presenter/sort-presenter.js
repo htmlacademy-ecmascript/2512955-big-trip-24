@@ -1,9 +1,8 @@
 import { remove, render, RenderPosition, replace } from '../framework/render';
 import { ModelActions } from '../service/actions';
-import Presenter from '../shared/presenter';
 import EventsSortFormView from '../view/events-sort-form-view/events-sort-form-view';
 
-export default class SortPresenter extends Presenter {
+export default class SortPresenter {
   /**
    * @type { EventsSortFormView }
    */
@@ -22,8 +21,7 @@ export default class SortPresenter extends Presenter {
   /**
    * @param { PresenterParams } params
    */
-  constructor({ sortModel, previousElement, ...presenterParams }) {
-    super(presenterParams);
+  constructor({ sortModel, previousElement }) {
     this.#previousElement = previousElement;
     this.#sortModel = sortModel;
     this.#sortModel.addObserver(this.#handleSortModelActions);
@@ -76,15 +74,11 @@ export default class SortPresenter extends Presenter {
  */
 
 /**
- * @typedef { import('../shared/presenter').PresenterConstructorParams } BasePresenterParams
+ * @typedef { import('../config/sorting-types').SortingTypes } SortingTypes
  */
 
 /**
- * @typedef { Object } PresenterAdditionalParams
+ * @typedef { Object } PresenterParams
  * @property { SorModel } PresenterAdditionalParams.sortModel
  * @property { HTMLElement } PresenterAdditionalParams.previousElement
- */
-
-/**
- * @typedef { BasePresenterParams & PresenterAdditionalParams } PresenterParams
  */

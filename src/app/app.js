@@ -17,6 +17,7 @@ export default class Application {
    * @static
    */
   static start() {
+
     const routeModel = new RouteModel();
     const offerModel = new OfferModel();
     const destinationModel = new RouteDestinationModel();
@@ -29,6 +30,15 @@ export default class Application {
       filterModel,
       sortModel
     });
-    rootPresenter.init();
+
+    Promise.all([
+      routeModel.init(),
+      offerModel.init(),
+      destinationModel.init()
+    ]).then(() => {
+      rootPresenter.init({ isDataLoadingFailed: false });
+    }).catch(() => {
+      rootPresenter.init({ isDataLoadingFailed: true });
+    });
   }
 }

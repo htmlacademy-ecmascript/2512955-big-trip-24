@@ -42,8 +42,14 @@ export default class RouteModel extends Model {
    * @param { RoutePointData } routePoint
    */
   addNewRoutePoint(modelActionType, routePoint) {
-    this.data = [...this.data, routePoint];
-    this._notify(modelActionType, routePoint);
+    //TODO: Выпилить костыльный ID
+    const fixedRoutePoint = {
+      ...routePoint,
+      id: crypto.randomUUID()
+    };
+    //TODO
+    this.data = [...this.data, fixedRoutePoint];
+    this._notify(modelActionType, fixedRoutePoint);
   }
 
   /**

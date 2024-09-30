@@ -1,14 +1,14 @@
-import AbstractStatefulView from '../../../framework/view/abstract-stateful-view';
 import { getEditEventTemplate } from './template';
 import { OFFER_INPUT_NAME, DATES_RANGE_LENGTH, DEFAULT_PARSE_RADIX } from './const';
 import flatpickr from 'flatpickr';
 import { DateFormats } from '../../../config/date-format';
 import { flatpickrUTCDateParser, flatpickrDateToUTCDate } from '../../../utills/time';
+import EncodedStatefulView from '../../../shared/encoded-stateful-view';
 
 /**
  * @extends AbstractStatefulView
  */
-export default class EditEventFormView extends AbstractStatefulView {
+export default class EditEventFormView extends EncodedStatefulView {
   #isNewEvent = false;
   /**
    * @type { FlatpickrInstance }
@@ -34,9 +34,9 @@ export default class EditEventFormView extends AbstractStatefulView {
   #onSubmitCallback = null;
 
   /**
-   * @type { OnDeleteButtonClickCallback }
+   * @type { OnDeleteCallback }
    */
-  #onDeleteButtonClickCallback = null;
+  #onDeleteCallback = null;
 
   /**
    * EditEventFormView constructor
@@ -48,12 +48,12 @@ export default class EditEventFormView extends AbstractStatefulView {
     getDestinations,
     onRollupButtonClick,
     onSubmit,
-    onDeleteButtonClick
+    onDelete
   }) {
     super();
     this.#onSubmitCallback = onSubmit;
     this.#getOffersCallback = getOffers;
-    this.#onDeleteButtonClickCallback = onDeleteButtonClick;
+    this.#onDeleteCallback = onDelete;
     this._setState(EditEventFormView.convertDataToState(routePoint, getOffers(routePoint.type), getDestinations()));
     this.#isNewEvent = !(routePoint.id && onRollupButtonClick);
 
@@ -110,7 +110,8 @@ export default class EditEventFormView extends AbstractStatefulView {
    */
   #deleteButtonClickHandler = (event) => {
     event.preventDefault();
-    this.#onDeleteButtonClickCallback(EditEventFormView.convertStateToData(this._state));
+    this.#onDeleteCallback(EditEventFormView.convertStateToData(this._state));
+    this.#destroyFlatPickers();
   };
 
   /**
@@ -120,6 +121,7 @@ export default class EditEventFormView extends AbstractStatefulView {
   #submitFormHandler = (event) => {
     event.preventDefault();
     this.#onSubmitCallback(EditEventFormView.convertStateToData(this._state));
+    this.#destroyFlatPickers();
   };
 
   /**
@@ -129,17 +131,14 @@ export default class EditEventFormView extends AbstractStatefulView {
   #rollupButtonClickHandler = (event) => {
     event.preventDefault();
     this.#onRollupButtonClickCallback();
+    this.#destroyFlatPickers();
   };
 
   #priceInputBlurHandler = (event) => {
     event.preventDefault();
-    const newPrice = Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX);
-
-    if (!Number.isNaN(newPrice)) {
-      this.updateElement({
-        basePrice: newPrice
-      });
-    }
+    this.updateElement({
+      basePrice: /^\d*$/.test(event.target.value) ? Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX) : this._state.basePrice
+    });
   };
 
   #offerInputChangeHandler = (event) => {
@@ -198,10 +197,13 @@ export default class EditEventFormView extends AbstractStatefulView {
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteButtonClickHandler);
   }
 
-  #setFlatPickers() {
+  #destroyFlatPickers() {
     this.#dateFromPicker?.destroy();
     this.#dateToPicker?.destroy();
+  }
 
+  #setFlatPickers() {
+    this.#destroyFlatPickers();
     this.#dateToPicker = flatpickr(
       this.element.querySelector(`#event-end-time-${this._state.id}`),
       {
@@ -270,7 +272,7 @@ export default class EditEventFormView extends AbstractStatefulView {
  * @property { GetDestinationsCallback } EditFormViewConstructorParams.getDestinations
  * @property { OnRollupButtonClickCallback } [EditFormViewConstructorParams.onRollupButtonClick=null]
  * @property { OnSubmitCallback } EditFormViewConstructorParams.onSubmit
- * @property { OnDeleteButtonCallback } EditFormViewConstructorParams.onDeleteButtonClick
+ * @property { OnDeleteCallback } EditFormViewConstructorParams.onDelete
  */
 
 /**
@@ -306,7 +308,7 @@ export default class EditEventFormView extends AbstractStatefulView {
  */
 
 /**
- * @callback OnDeleteButtonClickCallback
+ * @callback OnDeleteCallback
  * @param { RoutePointDto } routePoint
  * @returns { void }
  */

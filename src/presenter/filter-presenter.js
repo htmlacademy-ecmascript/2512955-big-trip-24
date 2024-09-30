@@ -1,11 +1,10 @@
-import Presenter from '../shared/presenter';
 import EventsFilterFormView from '../view/events-filter-form-view';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
 import { ModelActions } from '../service/actions';
 import { filterTypeByFunction } from '../utills/filter';
 import { remove, render, replace } from '../framework/render';
 
-export default class FilterPresenter extends Presenter {
+export default class FilterPresenter {
   /**
    * @type { HTMLElement }
    */
@@ -27,16 +26,30 @@ export default class FilterPresenter extends Presenter {
   #sortModel = null;
 
   /**
-   * @param { PresenterConstructorParams } params
+   * @type { RouteModel }
    */
-  constructor({ rootElement, filterModel, sortModel, ...basePreseneterParams }) {
-    super(basePreseneterParams);
+
+  #routeModel = null;
+
+  /**
+   * @param { FilterPresenterParams } params
+   */
+  constructor({ rootElement, filterModel, sortModel, routeModel }) {
     this.#filterModel = filterModel;
     this.#sortModel = sortModel;
     this.#rootElement = rootElement;
+    this.#routeModel = routeModel;
     this.#filterModel.addObserver(this.#handleModelActions);
-    this._routeModel.addObserver(this.#handleModelActions);
+    this.#routeModel.addObserver(this.#handleModelActions);
   }
+
+  /**
+   * External change filter
+   * @param { FilterTypes } filterType
+   */
+  changeFilter = (filterType) => {
+    this.#filterModel.changeFilter(ModelActions.MINOR_UPDATE, filterType);
+  };
 
   #handleModelActions = (actionType) => {
     switch(actionType) {
@@ -61,7 +74,7 @@ export default class FilterPresenter extends Presenter {
     const newFilterView = new EventsFilterFormView({
       onFilterChange: this.#filterChangeHandler,
       activeFilterType: this.#filterModel.filterType,
-      filtersRecordCountInfo: this._routeModel.getRoutesCountByFilters(filterTypeByFunction, new Date())
+      filtersRecordCountInfo: this.#routeModel.getRoutesCountByFilters(filterTypeByFunction, new Date())
     });
 
     if (this.#filterView) {
@@ -88,16 +101,21 @@ export default class FilterPresenter extends Presenter {
  */
 
 /**
- * @typedef { Object } FilterPresenterAdditionalParams
+ * @typedef { Object } FilterPresenterParams
  * @property { FilterModel } FilterPresenterAdditionalParams.filterModel
  * @property { SortModel } FilterPresenterAdditionalParams.sortModel
+ * @property { RouteModel } FilterPresenterAdditionalParams.routeModel
  * @property { HTMLElement } FilterPresenterAdditionalParams.rootElement
  */
 
 /**
- * @typedef { BasePresenterConstructorParams & FilterPresenterAdditionalParams } PresenterConstructorParams
+ * @typedef { import('../model/sort-model').default } SortModel
  */
 
 /**
- * @typedef { import('../model/sort-model').default } SortModel
+ * @typedef { import('../model/route-model').default } RouteModel
+ */
+
+/**
+ * @typedef { import('../config/filter-types').FilterTypes } FilterTypes
  */

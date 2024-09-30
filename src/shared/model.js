@@ -1,4 +1,5 @@
 import Observable from '../framework/observable';
+import EncodeService from '../service/encode-service';
 
 /**
  * Model parent abstract class
@@ -31,7 +32,7 @@ export default class Model extends Observable {
   }
 
   get data() {
-    return this.#data ?? this.#defaultData;
+    return EncodeService.encode(structuredClone(this.#data ?? this.#defaultData));
   }
 
   /**
