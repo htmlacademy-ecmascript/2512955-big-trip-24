@@ -83,6 +83,7 @@ export default class HeaderPresenter {
 
     if (this.#routeInfoView) {
       remove(this.#routeInfoView);
+      this.#routeInfoView = null;
     }
   }
 
