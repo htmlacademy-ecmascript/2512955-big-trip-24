@@ -12,16 +12,10 @@ export default class NewEventButtonView extends AbstractView {
   #onClickCallback = null;
 
   /**
-   * @type { boolean }
-   */
-  #disabled = false;
-
-  /**
    * @param { ViewConstructorParams } params
    */
-  constructor({ disabled = false, onClick }) {
+  constructor({ onClick }) {
     super();
-    this.#disabled = disabled;
     this.#onClickCallback = onClick;
     this.element.addEventListener('click', this.#newEventButtonClickHandler);
   }
@@ -35,7 +29,7 @@ export default class NewEventButtonView extends AbstractView {
   };
 
   get template() {
-    return getNewEventButtonTemplate(this.#disabled);
+    return getNewEventButtonTemplate();
   }
 }
 

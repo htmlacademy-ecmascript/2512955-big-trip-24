@@ -118,7 +118,7 @@ export default class RouteListPresenter {
   /**
    * RoutePointModel Observer
    * @param { ModelActions } actionType Updating event type
-   * @param { RoutePointData } data Updated item
+   * @param { RoutePointModelData } data Updated item
    */
   #handleRoutePointModelActions = (actionType, data) => {
     switch (actionType) {
@@ -262,7 +262,7 @@ export default class RouteListPresenter {
  */
 
 /**
- * @typedef { import('../model/route-model/route-model').RoutePointData } RoutePointData
+ * @typedef { import('../model/route-model').RoutePointModelData } RoutePointModelData
  */
 
 /**

@@ -8,27 +8,28 @@ import { NEW_ROUTE_POINT_DTO } from './defaults';
 export default class DataTransferObjectService {
   /**
    * Get RoutePointDto without destination and offers
-   * @param { RoutePointData } routePoint
+   * @param { RoutePointModelData } routePoint
    * @returns { RoutePointDto }
    */
   static getShortRoutePointDto(routePoint) {
+    const { basePrice, dateFrom, dateTo, id, isFavorite, type } = routePoint;
     return {
-      id: routePoint.id,
-      basePrice: routePoint.base_price,
-      dateFrom: routePoint.date_from,
-      dateTo: routePoint.date_to,
+      id,
+      basePrice,
+      dateFrom,
+      dateTo,
       destination: null,
-      isFavorite: routePoint.is_favorite,
-      type: routePoint.type,
+      isFavorite,
+      type,
       offers: []
     };
   }
 
   /**
    * Get RoutePointDto by RoutePointData
-   * @param { RoutePointData } routePoint
-   * @param { OfferData[] } offers
-   * @param { RouteDestinationData[] } destinations
+   * @param { RoutePointModelData } routePoint
+   * @param { OfferModelData[] } offers
+   * @param { DestinationModelData[] } destinations
    * @returns { RoutePointDto }
    */
   static getFullRoutePointDto(routePoint, offers, destinations) {
@@ -49,15 +50,16 @@ export default class DataTransferObjectService {
 
   /**
    * Get OfferDto by OfferData
-   * @param { OfferData } offer
+   * @param { OfferModelData } offer
    * @returns { OfferDto }
    */
   static getOfferDto(offer) {
     if (offer) {
+      const { id, price, title } = offer;
       return {
-        id: offer.id,
-        price: offer.price,
-        title: offer.title
+        id,
+        price,
+        title
       };
     }
 
@@ -66,7 +68,7 @@ export default class DataTransferObjectService {
 
   /**
    * Get DestinationDto by RouteDestinationData
-   * @param { RouteDestinationData } destination
+   * @param { DestinationModelData } destination
    * @returns { DestinationDto }
    * @static
    */
@@ -99,8 +101,8 @@ export default class DataTransferObjectService {
   /**
    * Get full route totals
    * @param { FullRouteInfo } routeTotals
-   * @param { OfferData[] } offers
-   * @param { RouteDestinationData[] } destinations
+   * @param { OfferModelData[] } offers
+   * @param { DestinationModelData[] } destinations
    * @returns { RouteTotalsDto | null }
    */
   static getFullRouteInfoDto(routeTotals, offers, destinations) {
@@ -125,18 +127,19 @@ export default class DataTransferObjectService {
   /**
    * Cast RoutePointDto to RoutePointData
    * @param { RoutePointDto } routePointDto
-   * @returns { RoutePointData }
+   * @returns { RoutePointModelData }
    */
   static createRoutePointDataByRoutePointDto(routePointDto) {
+    const { basePrice, dateFrom, dateTo, id, type, isFavorite, destination, offers } = routePointDto;
     return {
-      id: routePointDto.id,
-      base_price: routePointDto.basePrice,
-      date_from: routePointDto.dateFrom,
-      date_to: routePointDto.dateTo,
-      destination: routePointDto.destination.id,
-      is_favorite: routePointDto.isFavorite,
-      type: routePointDto.type,
-      offers: routePointDto.offers.map((current) => current.id)
+      id,
+      basePrice,
+      dateFrom,
+      dateTo,
+      destination: destination.id,
+      isFavorite,
+      type,
+      offers: offers.map((current) => current.id)
     };
   }
 }
@@ -154,15 +157,15 @@ export default class DataTransferObjectService {
  */
 
 /**
- * @typedef { import('../../model/offer-model').OfferData } OfferData
+ * @typedef { import('../../model/offer-model').OfferModelData } OfferModelData
  */
 
 /**
- * @typedef { import('../../model/route-destination-model').RouteDestinationData } RouteDestinationData
+ * @typedef { import('../../model/route-destination-model').DestinationModelData } DestinationModelData
  */
 
 /**
- * @typedef { import('../../model/route-model/route-model').RoutePointData } RoutePointData
+ * @typedef { import('../../model/route-model').RoutePointModelData } RoutePointModelData
  */
 
 /**
@@ -170,7 +173,7 @@ export default class DataTransferObjectService {
  */
 
 /**
- * @typedef { import('../../model/route-model/route-model').FullRouteInfo } FullRouteInfo
+ * @typedef { import('../../model/route-model').FullRouteInfo } FullRouteInfo
  */
 
 /**

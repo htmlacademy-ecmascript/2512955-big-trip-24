@@ -5,8 +5,8 @@ const DATE_DIFFERENCE_UNIT = 's';
 
 /**
  * Sorting by day
- * @param { RoutePointData[] } routePoints
- * @returns { RoutePointData[] }
+ * @param { RoutePointModelData[] } routePoints
+ * @returns { RoutePointModelData[] }
  */
 const sortByDay = (routePoints) => {
   const routePointsCopy = [...routePoints];
@@ -19,8 +19,8 @@ const sortByDay = (routePoints) => {
 
 /**
  * Sorting by price
- * @param { RoutePointData[] } routePoints
- * @returns { RoutePointData[] }
+ * @param { RoutePointModelData[] } routePoints
+ * @returns { RoutePointModelData[] }
  */
 const sortByPrice = (routePoints) => {
   const routePointsCopy = [...routePoints];
@@ -33,8 +33,8 @@ const sortByPrice = (routePoints) => {
 
 /**
  * Sorting by time
- * @param { RoutePointData[] } routePoints
- * @returns { RoutePointData[] }
+ * @param { RoutePointModelData[] } routePoints
+ * @returns { RoutePointModelData[] }
  */
 const sortByTime = (routePoints) => {
   const routePointsCopy = [...routePoints];
@@ -56,5 +56,5 @@ export const sortingTypeByFunction = {
 };
 
 /**
- * @typedef { import('../model/route-model/route-model').RoutePointData }
+ * @typedef { import('../model/route-model').RoutePointModelData } RoutePointModelData
  */
