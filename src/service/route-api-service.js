@@ -22,6 +22,7 @@ export default class RouteApiService extends ApiService {
 
     if (body && typeof(body) === 'object') {
       stringifiedBody = JSON.stringify(body);
+      headers.append('Content-Type', 'application/json');
     }
 
     const response = await this._load({url, method, body: stringifiedBody, headers});

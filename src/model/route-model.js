@@ -3,6 +3,7 @@ import { SortingTypes } from '../config/sorting-types';
 import { sortingTypeByFunction } from '../utills/sorting';
 import { updateItem } from '../utills/array';
 import ServerDataAdapter from '../service/server-data-adapter';
+import { ModelActions } from '../service/actions';
 
 /**
  * @extends { Model<RoutePointModelData[], RouteApiService> } Route model
@@ -19,6 +20,7 @@ export default class RouteModel extends Model {
     try {
       const serverData = await this._api.getRoute();
       this.data = serverData.map((current) => ServerDataAdapter.adaptRoutePointToModel(current));
+      this._notify(ModelActions.INIT);
     } catch(err) {
       throw new Error(err?.message ?? 'Can\'t init route model');
     }
@@ -71,9 +73,10 @@ export default class RouteModel extends Model {
      */
     const routeCompareFunction = (current) => current.id === routePoint.id;
     try {
-      const updatedItem = await this._api.updateRoutePoint(ServerDataAdapter.adaptRoutePointToServer(routePoint));
-      this.data = updateItem(this.data, updatedItem, routeCompareFunction);
-      this._notify(modelActionType, updatedItem);
+      const updatedItemServerData = await this._api.updateRoutePoint(ServerDataAdapter.adaptRoutePointToServer(routePoint));
+      const adaptedItemToModel = ServerDataAdapter.adaptRoutePointToModel(updatedItemServerData);
+      this.data = updateItem(this.data, adaptedItemToModel, routeCompareFunction);
+      this._notify(modelActionType, adaptedItemToModel);
     } catch(err) {
       throw new Error(err?.message ?? 'Can\'t update route point');
     }
@@ -125,13 +128,14 @@ export default class RouteModel extends Model {
    * @returns { RouteCountsByFiltersInfo }
    */
   getRoutesCountByFilters(filters, date) {
-    return Object.keys(filters).reduce((accum, current) => {
+    const data = Object.keys(filters).reduce((accum, current) => {
       const filterFunction = filters[current];
       return {
         ...accum,
         [current]: (filterFunction(date, this.data)?.length ?? 0)
       };
     }, {});
+    return data;
   }
 }
 

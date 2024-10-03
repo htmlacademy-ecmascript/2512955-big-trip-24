@@ -11,8 +11,8 @@ const DATE_DIFFERENCE_UNIT = 's';
 const sortByDay = (routePoints) => {
   const routePointsCopy = [...routePoints];
   return routePointsCopy.sort((firstPoint, secondPoint) => {
-    const firstPointDateFrom = dayjs(firstPoint.date_from);
-    const secondPointDateFrom = dayjs(secondPoint.date_from);
+    const firstPointDateFrom = dayjs(firstPoint.dateFrom);
+    const secondPointDateFrom = dayjs(secondPoint.dateFrom);
     return firstPointDateFrom.diff(secondPointDateFrom, DATE_DIFFERENCE_UNIT);
   });
 };
@@ -25,8 +25,8 @@ const sortByDay = (routePoints) => {
 const sortByPrice = (routePoints) => {
   const routePointsCopy = [...routePoints];
   return routePointsCopy.sort((firstPoint, secondPoint) => {
-    const firstPointPrice = firstPoint.base_price;
-    const secondPointPrice = secondPoint.base_price;
+    const firstPointPrice = firstPoint.basePrice;
+    const secondPointPrice = secondPoint.basePrice;
     return secondPointPrice - firstPointPrice;
   });
 };
@@ -39,10 +39,10 @@ const sortByPrice = (routePoints) => {
 const sortByTime = (routePoints) => {
   const routePointsCopy = [...routePoints];
   return routePointsCopy.sort((firstPoint, secondPoint) => {
-    const firstPointDateFrom = dayjs(firstPoint.date_from);
-    const secondPointDateFrom = dayjs(secondPoint.date_from);
-    const firstPointDateTo = dayjs(firstPoint.date_to);
-    const secondPointDateTo = dayjs(secondPoint.date_to);
+    const firstPointDateFrom = dayjs(firstPoint.dateFrom);
+    const secondPointDateFrom = dayjs(secondPoint.dateFrom);
+    const firstPointDateTo = dayjs(firstPoint.dateTo);
+    const secondPointDateTo = dayjs(secondPoint.dateTo);
     const secondPointLength = secondPointDateTo.diff(secondPointDateFrom, DATE_DIFFERENCE_UNIT);
     const firstPointLength = firstPointDateTo.diff(firstPointDateFrom, DATE_DIFFERENCE_UNIT);
     return secondPointLength - firstPointLength;

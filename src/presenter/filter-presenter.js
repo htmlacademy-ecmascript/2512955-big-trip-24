@@ -53,6 +53,7 @@ export default class FilterPresenter {
 
   #handleModelActions = (actionType) => {
     switch(actionType) {
+      case ModelActions.INIT:
       case ModelActions.PATCH:
       case ModelActions.MINOR_UPDATE:
       case ModelActions.MAJOR_UPDATE: {
