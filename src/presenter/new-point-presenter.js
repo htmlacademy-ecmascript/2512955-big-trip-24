@@ -105,9 +105,8 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escapeKeydownHandler);
   };
 
-  #renderNewEventButtonView(disabled = false) {
+  #renderNewEventButtonView() {
     const newEventButtonView = new NewEventButtonView({
-      disabled,
       onClick: this.#newEventButtonClickHandler
     });
 
@@ -144,6 +143,15 @@ export default class NewPointPresenter {
     this.#newEventCancelButtonClickHandler();
   }
 
+  setDisabledAttribute(disabled) {
+    if (disabled) {
+      this.#newEventButtonView.element.setAttribute('disabled', true);
+      return;
+    }
+
+    this.#newEventButtonView.element.removeAttribute('disabled');
+  }
+
   #renderNewEventView() {
     const container = this.#listView.element;
     const routePointTemplate = DataTransferObjectService.getNewRoutePointDto();
@@ -168,7 +176,8 @@ export default class NewPointPresenter {
   }
 
   init({ disabled = false }) {
-    this.#renderNewEventButtonView(disabled);
+    this.#renderNewEventButtonView();
+    this.setDisabledAttribute(disabled);
   }
 }
 

@@ -1,23 +1,31 @@
 import Model from '../shared/model';
-import { getOffersMock } from '../mock/offer';
+import ServerDataAdapter from '../service/server-data-adapter';
 
 /**
  * OfferModel
- * @extends Model<OfferModelData[]>
+ * @extends { Model<OfferByTypeModelData[], RouteApiService> }
  */
 export default class OfferModel extends Model {
-  constructor() {
-    super({defaultData: []});
+  /**
+   * @param { OfferModelConstuctorParams } params
+   */
+  constructor({ api }) {
+    super({defaultData: [], api});
   }
 
   async init() {
-    super._fetchData({ fetchFn: getOffersMock });
+    try {
+      const serverData = await this._api.getOffers();
+      this.data = serverData.map((current) => ServerDataAdapter.adaptOffersByTypeToModel(current));
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t init offers model');
+    }
   }
 
   /**
    * Get full offers by event type
    * @param { RoutePointsTypes } eventType
-   * @returns { OfferData[] }
+   * @returns { OfferModelData[] }
    */
   getOffersByEventType(eventType) {
     return this.data.find((current) => eventType === current.type)?.offers ?? [];
@@ -25,7 +33,7 @@ export default class OfferModel extends Model {
 
   /**
    * Get all offers
-   * @returns { OfferData[] }
+   * @returns { OfferModelData[] }
    */
   getAllOffers() {
     return this.data.reduce((accum, current) => {
@@ -43,16 +51,23 @@ export default class OfferModel extends Model {
  */
 
 /**
- * OfferModelData
- * @typedef { Object } OfferData
- * @property { string } OfferData.id
- * @property { string } OfferData.title
- * @property { number } OfferData.price
+ * @typedef { Object } OfferByTypeModelData
+ * @property { RoutePointsTypes } OfferByTypeModelData.type
+ * @property { OfferServerData[] } OfferByTypeModelData.offers
  */
 
 /**
- * OfferModelData
  * @typedef { Object } OfferModelData
- * @property { RoutePointsTypes } type
- * @property { OfferData[] } offers
+ * @property { string } OfferModelData.id
+ * @property { string } OfferModelData.title
+ * @property { number } OfferModelData.price
+ */
+
+
+/**
+ * @typedef { import('../service/route-api-service').ObjectWithApiInstance } OfferModelConstuctorParams
+ */
+
+/**
+ * @typedef { import('../service/route-api-service').default } RouteApiService
  */

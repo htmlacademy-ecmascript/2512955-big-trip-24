@@ -1,42 +1,55 @@
+import ServerDataAdapter from '../service/server-data-adapter';
 import Model from '../shared/model';
-import { getDestinationsMock } from '../mock/route-destination';
 
 /**
  * RouteDestinationModel
- * @extends Model<RouteDestinationData[]>
+ * @extends { Model<DestinationModelData[], RouteApiService> }
  */
 export default class RouteDestinationModel extends Model {
-  constructor() {
-    super({defaultData: []});
-  }
-
-  async init() {
-    super._fetchData({ fetchFn: getDestinationsMock });
+  /**
+   * @param { RouteDestinationModelConstuctorParams } params
+   */
+  constructor({ api }) {
+    super({defaultData: [], api});
   }
 
   /**
    * Get destination info by Id
    * @param { string } destinationId
-   * @returns { RouteDestinationData | null }
+   * @returns { DestinationModelData | null }
    */
   getDestinationById(destinationId) {
     const destination = this.data.find((current) => destinationId === current.id);
     return destination ? destination : null;
   }
+
+  async init() {
+    try {
+      const serverData = await this._api.getDestinations();
+      this.data = serverData.map((current) => ServerDataAdapter.adaptDestinationToModel(current));
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t init destination model');
+    }
+  }
 }
 
 /**
- * DestinationPictureData
- * @typedef { Object } DestinationPictureData
- * @property { string } DestinationPictureData.src
- * @property { string } DestinationPictureData.description
+ * @typedef { Object } DestinationPictureModelData
+ * @property { string } DestinationPictureModelData.src
+ * @property { string } DestinationPictureModelData.description
  */
 
 /**
- * RouteDestinationData
- * @typedef { Object } RouteDestinationData
- * @property { string } RouteDestinationData.id
- * @property { string } RouteDestinationData.description
- * @property { string } RouteDestinationData.name
- * @property { DestinationPictureData[] } RouteDestinationData.pictures
+ * @typedef { Object } DestinationModelData
+ * @property { string } DestinationModelData.id
+ * @property { string } DestinationModelData.name
+ * @property { DestinationPictureModelData[] } DestinationModelData.pictures
+ */
+
+/**
+ * @typedef { import('../service/route-api-service').ObjectWithApiInstance } RouteDestinationModelConstuctorParams
+ */
+
+/**
+ * @typedef { import('../service/route-api-service').default } RouteApiService
  */

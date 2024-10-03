@@ -5,22 +5,22 @@ import { DateFormats } from '../config/date-format';
 /**
  * Default filter
  * @param { Date } date Now date
- * @param { RoutePointData[] } routePoints Route points data in model
- * @returns { RoutePointData[] } Filtered route points
+ * @param { RoutePointModelData[] } routePoints Route points data in model
+ * @returns { RoutePointModelData[] } Filtered route points
  */
 const everythingFilter = (date, routePoints) => routePoints;
 
 /**
  * Future points filter
  * @param { Date } date Now date
- * @param { RoutePointData[] } routePoints Route points data in model
- * @returns { RoutePointData[] } Filtered route points
+ * @param { RoutePointModelData[] } routePoints Route points data in model
+ * @returns { RoutePointModelData[] } Filtered route points
  */
 const futureFilter = (date, routePoints) => {
   const nowDate = dayjs(date);
 
   return routePoints.filter((current) => {
-    const { date_from: dateFrom } = current;
+    const { dateFrom } = current;
     const beginDate = dayjs(dateFrom);
 
     return beginDate.isAfter(nowDate);
@@ -30,14 +30,14 @@ const futureFilter = (date, routePoints) => {
 /**
  * Present points filter
  * @param { Date } date Now date
- * @param { RoutePointData[] } routePoints Route points data in model
- * @returns { RoutePointData[] } Filtered route points
+ * @param { RoutePointModelData[] } routePoints Route points data in model
+ * @returns { RoutePointModelData[] } Filtered route points
  */
 const presentFilter = (date, routePoints) => {
   const nowDate = dayjs(date, DateFormats.DATE_FORMAT);
 
   return routePoints.filter((current) => {
-    const { date_from: dateFrom, date_to: dateTo } = current;
+    const { dateFrom, dateTo } = current;
     const beginDate = dayjs(dateFrom);
     const endDate = dayjs(dateTo);
 
@@ -49,14 +49,14 @@ const presentFilter = (date, routePoints) => {
 /**
  * Past points filter
  * @param { Date } date Now date
- * @param { RoutePointData[] } routePoints Route points data in model
- * @returns { RoutePointData[] } Filtered route points
+ * @param { RoutePointModelData[] } routePoints Route points data in model
+ * @returns { RoutePointModelData[] } Filtered route points
  */
 const pastFilter = (date, routePoints) => {
   const nowDate = dayjs(date);
 
   return routePoints.filter((current) => {
-    const { date_to: dateTo } = current;
+    const { dateTo } = current;
     const endDate = dayjs(dateTo);
 
     return endDate.isBefore(nowDate);
@@ -75,9 +75,9 @@ export const filterTypeByFunction = {
 };
 
 /**
- * @typedef { import('../model/route-model/route-model').RoutePointData } RoutePointData
+ * @typedef { import('../model/route-model').RoutePointModelData } RoutePointModelData
  */
 
 /**
- * @typedef { { [x: string]: (date: Date, routePoints: RoutePointData[]) => RoutePointData[] } } FilterTypeByFunction
+ * @typedef { { [x: string]: (date: Date, routePoints: RoutePointModelData[]) => RoutePointModelData[] } } FilterTypeByFunction
  */

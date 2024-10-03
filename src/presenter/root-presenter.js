@@ -48,12 +48,18 @@ export default class RootPresenter {
    */
   #routeModel = null;
 
+  #destinationModel = null;
+
+  #offerModel = null;
+
   /**
    * Presenter constructor
    * @param { PresenterConstructorParams } params
    */
   constructor({ sortModel, filterModel, routeModel, destinationModel, offerModel }) {
     this.#routeModel = routeModel;
+    this.#destinationModel = destinationModel;
+    this.#offerModel = offerModel;
     this.#sortPresenter = new SortPresenter({
       sortModel,
       previousElement: tripEventsElement.querySelector('h2')
@@ -67,15 +73,15 @@ export default class RootPresenter {
     this.#headerPresenter = new HeaderPresenter({
       headerRootElement: tripMainElement,
       routeModel: this.#routeModel,
-      destinationModel,
-      offerModel
+      destinationModel: this.#destinationModel,
+      offerModel: this.#offerModel
     });
     this.#routeListPresenter = new RouteListPresenter({
       routeModel: this.#routeModel,
-      destinationModel,
+      destinationModel: this.#destinationModel,
+      offerModel: this.#offerModel,
       filterModel,
       sortModel,
-      offerModel,
       rootElement: tripEventsElement,
       destroyMessageView: this.#destroyMessageView,
       showMessageCallback: this.#renderMessage,
@@ -85,9 +91,9 @@ export default class RootPresenter {
     });
     this.#newPointPresenter = new NewPointPresenter({
       routeModelDispatch: this.#routeModelDispatch,
-      destinationModel,
-      offerModel,
       routeModel: this.#routeModel,
+      destinationModel: this.#destinationModel,
+      offerModel: this.#offerModel,
       listView: this.#routeListPresenter.listView,
       rootElement: tripMainElement,
       onNewEventButtonClick: this.#newEventButtonClickHandler,
@@ -163,16 +169,24 @@ export default class RootPresenter {
     this.#messageView = messageView;
   };
 
-  init({ isDataLoadingFailed = false }) {
+  init() {
     this.#filterPresenter.init();
-    this.#newPointPresenter.init({ disabled: isDataLoadingFailed });
-    if (isDataLoadingFailed) {
+    this.#newPointPresenter.init({ disabled: true });
+    this.#renderMessage('Loading...');
+
+    Promise.all([
+      this.#routeModel.init(),
+      this.#offerModel.init(),
+      this.#destinationModel.init()
+    ]).then(() => {
+      this.#destroyMessageView();
+      this.#newPointPresenter.setDisabledAttribute(false);
+      this.#sortPresenter.init();
+      this.#headerPresenter.init();
+      this.#routeListPresenter.init();
+    }).catch(() => {
       this.#renderMessage('Failed to load latest route information');
-      return;
-    }
-    this.#sortPresenter.init();
-    this.#headerPresenter.init();
-    this.#routeListPresenter.init();
+    });
   }
 }
 

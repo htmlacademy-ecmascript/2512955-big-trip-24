@@ -6,7 +6,7 @@ import { flatpickrUTCDateParser, flatpickrDateToUTCDate } from '../../../utills/
 import EncodedStatefulView from '../../../shared/encoded-stateful-view';
 
 /**
- * @extends AbstractStatefulView
+ * @extends EncodedStatefulView
  */
 export default class EditEventFormView extends EncodedStatefulView {
   #isNewEvent = false;

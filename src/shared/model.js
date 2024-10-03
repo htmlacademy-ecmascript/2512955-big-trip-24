@@ -1,11 +1,20 @@
 import Observable from '../framework/observable';
-import EncodeService from '../service/encode-service';
 
 /**
  * Model parent abstract class
- * @template TModelData
+ * @template TModelData Model data type
+ * @template TApiInstanceType Api instance type
  */
 export default class Model extends Observable {
+  /**
+   * @type { TApiInstanceType }
+   */
+  #api = null;
+
+  get _api() {
+    return this.#api;
+  }
+
   /**
    * Model data
    * @type { TModelData }
@@ -22,17 +31,18 @@ export default class Model extends Observable {
    * Model constructor
    * @param { ConstructorParams<TModelData> } constructorParams
    */
-  constructor({ defaultData }) {
+  constructor({ defaultData, api }) {
     super();
     if (new.target === Model) {
       throw new Error('Model is Abstract class!!');
     }
 
     this.#defaultData = defaultData;
+    this.#api = api;
   }
 
   get data() {
-    return EncodeService.encode(structuredClone(this.#data ?? this.#defaultData));
+    return structuredClone(this.#data ?? this.#defaultData);
   }
 
   /**
@@ -42,14 +52,6 @@ export default class Model extends Observable {
    */
   set data(value) {
     this.#data = value;
-  }
-
-  /**
-   * Data fetching
-   * @param { FetchDataParams<TModelData> } FetchDataParams
-   */
-  async _fetchData({ fetchFn }) {
-    this.#data = await fetchFn();
   }
 
   /**
@@ -63,19 +65,10 @@ export default class Model extends Observable {
 /**
  * Constructor params
  * @template TModelData
- * @typedef { { defaultData: TModelData } } ConstructorParams
- */
-
-/**
- * Fetch function callback type
- * @callback FetchFunction
- * @return { Promise<any> }
- */
-
-/**
- * _fetchData params
- * @template TModelData
- * @typedef { { fetchFn: () => Promise<TModelData> } } FetchDataParams
+ * @template TApiInstanceType
+ * @typedef { Object } ConstructorParams
+ * @property { TModelData } ConstructorParams.defaultData
+ * @property { RouteApiService } ConstructorParams.api
  */
 
 /**

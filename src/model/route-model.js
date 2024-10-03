@@ -1,26 +1,35 @@
 import Model from '../shared/model';
-import { getRandomRouteMock } from '../mock/route';
 import { SortingTypes } from '../config/sorting-types';
 import { sortingTypeByFunction } from '../utills/sorting';
 import { updateItem } from '../utills/array';
+import ServerDataAdapter from '../service/server-data-adapter';
+import { ModelActions } from '../service/actions';
 
 /**
- * RouteModel
- * @extends Model<RoutePointData[]>
+ * @extends { Model<RoutePointModelData[], RouteApiService> } Route model
  */
 export default class RouteModel extends Model {
-  constructor() {
-    super({ defaultData: [] });
+  /**
+   * @param { RouteModelConstructorParams } params
+   */
+  constructor({ api }) {
+    super({ defaultData: [], api });
   }
 
   async init() {
-    super._fetchData({ fetchFn: getRandomRouteMock });
+    try {
+      const serverData = await this._api.getRoute();
+      this.data = serverData.map((current) => ServerDataAdapter.adaptRoutePointToModel(current));
+      this._notify(ModelActions.INIT);
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t init route model');
+    }
   }
 
   /**
    * Get route point by id
    * @param { string } pointId
-   * @returns { RoutePointData }
+   * @returns { RoutePointModelData }
    */
   getRoutePointById(pointId) {
     return this.data.find((current) => current.id === pointId);
@@ -29,7 +38,7 @@ export default class RouteModel extends Model {
   /**
    * Delete route point
    * @param { ModelActions } modelActionType
-   * @param { RoutePointData } routePoint
+   * @param { RoutePointModelData } routePoint
    */
   deleteRoutePoint(modelActionType, routePoint) {
     this.data = this.data.filter((current) => current.id !== routePoint.id);
@@ -39,7 +48,7 @@ export default class RouteModel extends Model {
   /**
    * Add new route point
    * @param { ModelActions } modelActionType
-   * @param { RoutePointData } routePoint
+   * @param { RoutePointModelData } routePoint
    */
   addNewRoutePoint(modelActionType, routePoint) {
     //TODO: Выпилить костыльный ID
@@ -54,17 +63,23 @@ export default class RouteModel extends Model {
 
   /**
    * Update existed route point
-   * @param { RoutePointData } routePoint
+   * @param { RoutePointModelData } routePoint
    * @param { ModelActions } modelActionType
    */
-  updateRoutePoint(modelActionType, routePoint) {
+  async updateRoutePoint(modelActionType, routePoint) {
     /**
-     * @param { RoutePointData } current
+     * @param { RoutePointModelData } current
      * @returns { boolean }
      */
     const routeCompareFunction = (current) => current.id === routePoint.id;
-    this.data = updateItem(this.data, routePoint, routeCompareFunction);
-    this._notify(modelActionType, routePoint);
+    try {
+      const updatedItemServerData = await this._api.updateRoutePoint(ServerDataAdapter.adaptRoutePointToServer(routePoint));
+      const adaptedItemToModel = ServerDataAdapter.adaptRoutePointToModel(updatedItemServerData);
+      this.data = updateItem(this.data, adaptedItemToModel, routeCompareFunction);
+      this._notify(modelActionType, adaptedItemToModel);
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t update route point');
+    }
   }
 
   /**
@@ -82,8 +97,8 @@ export default class RouteModel extends Model {
       const result = {
         totalBasePrice: 0,
         offers: [],
-        routeDateTo: sortedData[sortedData.length - 1].date_from,
-        routeDateFrom: sortedData[0].date_from,
+        routeDateTo: sortedData[sortedData.length - 1].dateFrom,
+        routeDateFrom: sortedData[0].dateFrom,
         destinationIds: []
       };
 
@@ -96,7 +111,7 @@ export default class RouteModel extends Model {
 
         return {
           ...accum,
-          totalBasePrice: accum.totalBasePrice + current.base_price,
+          totalBasePrice: accum.totalBasePrice + current.basePrice,
           offers: [...accum.offers, ...(current.offers ?? [])],
           destinationIds: destinationIds
         };
@@ -113,27 +128,28 @@ export default class RouteModel extends Model {
    * @returns { RouteCountsByFiltersInfo }
    */
   getRoutesCountByFilters(filters, date) {
-    return Object.keys(filters).reduce((accum, current) => {
+    const data = Object.keys(filters).reduce((accum, current) => {
       const filterFunction = filters[current];
       return {
         ...accum,
         [current]: (filterFunction(date, this.data)?.length ?? 0)
       };
     }, {});
+    return data;
   }
 }
 
 /**
- * RouteModelData
- * @typedef { Object } RoutePointData
- * @property { string } RoutePointData.id
- * @property { number } RoutePointData.base_price
- * @property { string } RoutePointData.date_from
- * @property { string } RoutePointData.date_to
- * @property { string } RoutePointData.destination
- * @property { boolean } RoutePointData.is_favorite
- * @property { string[] } RoutePointData.offers
- * @property { RoutePointsTypes } type
+ * Model data
+ * @typedef { Object } RoutePointModelData
+ * @property { string } RoutePointModelData.id
+ * @property { number } RoutePointModelData.basePrice
+ * @property { string } RoutePointModelData.dateFrom
+ * @property { string } RoutePointModelData.dateTo
+ * @property { string } RoutePointModelData.destination
+ * @property { boolean } RoutePointModelData.isFavorite
+ * @property { string[] } RoutePointModelData.offers
+ * @property { RoutePointsTypes } RoutePointModelData.type
  */
 
 /**
@@ -161,4 +177,12 @@ export default class RouteModel extends Model {
 
 /**
  * @typedef { import('../service/actions').ModelActions } ModelActions
+ */
+
+/**
+ * @typedef { import('../service/route-api-service').default } RouteApiService
+ */
+
+/**
+ * @typedef { import('../service/route-api-service').ObjectWithApiInstance } RouteModelConstructorParams
  */

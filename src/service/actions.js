@@ -11,6 +11,7 @@ export const UserActions = {
  * @enum { string } Existsing model action types
  */
 export const ModelActions = {
+  INIT: 'init',
   PATCH: 'patch',
   MINOR_UPDATE: 'minor_update',
   MAJOR_UPDATE: 'major_update',
