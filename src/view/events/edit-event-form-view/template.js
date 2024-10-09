@@ -6,9 +6,10 @@ import { DateFormats } from '../../../config/date-format';
  * Get event types fieldset
  * @param { RoutePointsTypes } selectedType
  * @param { Nullable<string> } eventId
+ * @param { boolean } [disabled]
  * @returns { string }
  */
-const getEventTypeFieldSetTemplate = (selectedType, eventId) => {
+const getEventTypeFieldSetTemplate = (selectedType, eventId, disabled = false) => {
   const allPointsTypes = Object.values(RoutePointsTypes);
 
   /**
@@ -18,10 +19,10 @@ const getEventTypeFieldSetTemplate = (selectedType, eventId) => {
    */
   const renderPointType = (pointType) => {
     const checkedAttribute = pointType === selectedType ? 'checked' : '';
-
+    const disabledAttribute = disabled ? 'disabled' : '';
     return `
       <div class="event__type-item">
-        <input id="event-type-${pointType}-${eventId}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${pointType}" ${checkedAttribute}>
+        <input id="event-type-${pointType}-${eventId}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${pointType}" ${checkedAttribute} ${disabledAttribute}>
         <label class="event__type-label  event__type-label--${pointType}" for="event-type-${pointType}-${eventId}">${pointType}</label>
       </div>`;
   };
@@ -57,21 +58,22 @@ const getDestinationSelectTemplate = (allDestinations, eventId) => {
 
 /**
  * Get point timeline template
- * @param { { dateFrom: Nullable<string>, dateTo: Nullable<string>, id: Nullable<string> } } params
+ * @param { { dateFrom: Nullable<string>, dateTo: Nullable<string>, id: Nullable<string>, disabled: boolean } } params
  * @returns
  */
-const getPointTimeLineTemplate = ({ dateFrom, dateTo, id }) => {
+const getPointTimeLineTemplate = ({ dateFrom, dateTo, id, disabled = false }) => {
   const eventBegin = dayjs(dateFrom);
   const eventEnd = dayjs(dateTo);
   const eventBeginValue = dateFrom ? eventBegin.format(DateFormats.TIMELINE_INPUT_FORMAT) : '';
   const eventEndValue = dateTo ? eventEnd.format(DateFormats.TIMELINE_INPUT_FORMAT) : '';
+  const disabledAttribute = disabled ? 'disabled' : '';
   return `
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-${id}">From</label>
-      <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${eventBeginValue}">
+      <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" ${disabledAttribute} value="${eventBeginValue}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-${id}">To</label>
-      <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${eventEndValue}">
+      <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" ${disabledAttribute} value="${eventEndValue}">
     </div>`;
 };
 
@@ -79,6 +81,7 @@ const getPointTimeLineTemplate = ({ dateFrom, dateTo, id }) => {
  * @typedef { Object } GetEventPriceParams
  * @property { Nullable<string> } GetEventPriceParams.id
  * @property { number } [GetEventPriceParams.basePrice=0]
+ * @property { boolean } [GetEventPriceParams.disabled]
  */
 
 /**
@@ -86,13 +89,13 @@ const getPointTimeLineTemplate = ({ dateFrom, dateTo, id }) => {
  * @param { GetEventPriceParams } params
  * @returns { string }
  */
-const getEventPriceInputTemplate = ({ id, basePrice = 0 }) => `
+const getEventPriceInputTemplate = ({ id, basePrice = 0, disabled = false }) => `
   <div class="event__field-group  event__field-group--price">
     <label class="event__label" for="event-price-${id}">
       <span class="visually-hidden">Price</span>
       &euro;
     </label>
-    <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
+    <input class="event__input  event__input--price" id="event-price-${id}" type="text" ${disabled ? 'disabled' : ''} name="event-price" value="${basePrice}">
   </div>`;
 
 /**
@@ -166,17 +169,21 @@ export const getEditEventTemplate = ({ fullDestinations, fullOffers, ...data }) 
     offers,
     basePrice,
     dateFrom,
-    dateTo
+    dateTo,
+    isDeleting,
+    isSaving
   } = data;
 
-  const cancelButtonDescription = id ? 'Delete' : 'Cancel';
-
+  const disabled = isDeleting || isSaving;
+  const deleteDescription = disabled ? 'Deleting...' : 'Delete';
+  const cancelButtonDescription = id ? deleteDescription : 'Cancel';
+  const saveButtonDescription = isSaving ? 'Saving...' : 'Save';
   const destinationTemplate = destination
     ? `<section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
         <p class="event__destination-description">${destination?.description ?? ''}</p>
         ${getEventPhotosTemplate(destination?.pictures)}
-          </section>`
+      </section>`
     : '';
 
   return `
@@ -187,7 +194,7 @@ export const getEditEventTemplate = ({ fullDestinations, fullOffers, ...data }) 
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" ${disabled ? 'disabled' : ''} type="checkbox">
 
           <div class="event__type-list">
             ${getEventTypeFieldSetTemplate(type, id)}
@@ -198,15 +205,15 @@ export const getEditEventTemplate = ({ fullDestinations, fullOffers, ...data }) 
           <label class="event__label  event__type-output" for="event-destination-${id}">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destination?.name ?? ''}" list="destination-list-${id}">
+          <input class="event__input  event__input--destination" id="event-destination-${id}" ${disabled ? 'disabled' : ''} type="text" name="event-destination" value="${destination?.name ?? ''}" list="destination-list-${id}">
           ${getDestinationSelectTemplate(fullDestinations, id)}
         </div>
 
         ${getPointTimeLineTemplate({ id, dateFrom, dateTo })}
         ${getEventPriceInputTemplate({ id, basePrice })}
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${cancelButtonDescription}</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${disabled ? 'disabled' : ''}>${saveButtonDescription}</button>
+        <button class="event__reset-btn" type="reset" ${disabled ? 'disabled' : ''}>${cancelButtonDescription}</button>
         ${id ? `<button class="event__rollup-btn" type="button">
                 <span class="visually-hidden">Open event</span>
               </button>` : ''}

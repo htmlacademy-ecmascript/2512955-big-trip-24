@@ -7,6 +7,8 @@ import FilterPresenter from './filter-presenter';
 import NewPointPresenter from './new-point-presenter';
 import { UserActions } from '../service/actions';
 import DataTransferObjectService from '../service/data-transfer-object-service';
+import UiBlocker from '../framework/ui-blocker/ui-blocker';
+import { TimeLimits } from '../config/blocker';
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
@@ -122,31 +124,37 @@ export default class RootPresenter {
    * @param { UserActions } userAction User action type
    * @param { ModelActions } modelAction Model action type
    * @param { RoutePointDto } payload Action payload
-   * @returns { void }
+   * @returns { Promise<void> }
    */
-  #routeModelDispatch = (userAction, modelAction, payload) => {
-    let routeModelAction = null;
-    switch (userAction) {
-      case UserActions.ADD_NEW_POINT: {
-        routeModelAction = this.#routeModel.addNewRoutePoint;
-        break;
+  #routeModelDispatch = async (userAction, modelAction, payload) => {
+    const blocker = new UiBlocker({
+      lowerLimit: TimeLimits.LOWER_LIMIT,
+      upperLimit: TimeLimits.UPPER_LIMIT,
+    });
+    blocker.block();
+    const routePoint = DataTransferObjectService.createRoutePointDataByRoutePointDto(payload);
+    try {
+      switch (userAction) {
+        case UserActions.ADD_NEW_POINT: {
+          if (routePoint['id'] || routePoint['id'] === null) {
+            delete routePoint.id;
+          }
+          await this.#routeModel.addNewRoutePoint(modelAction, routePoint);
+          break;
+        }
+        case UserActions.UPDATE_POINT: {
+          await this.#routeModel.updateRoutePoint(modelAction, routePoint);
+          break;
+        }
+        case UserActions.DELETE_POINT: {
+          await this.#routeModel.deleteRoutePoint(modelAction, routePoint);
+          break;
+        }
       }
-      case UserActions.UPDATE_POINT: {
-        routeModelAction = this.#routeModel.updateRoutePoint;
-        break;
-      }
-      case UserActions.DELETE_POINT: {
-        routeModelAction = this.#routeModel.deleteRoutePoint;
-        break;
-      }
-    }
-
-    if (routeModelAction) {
-      routeModelAction.call(
-        this.#routeModel,
-        modelAction,
-        DataTransferObjectService.createRoutePointDataByRoutePointDto(payload)
-      );
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t apply model action');
+    } finally {
+      blocker.unblock();
     }
   };
 

@@ -95,7 +95,7 @@ export default class NewPointPresenter {
     this.#renderNewEventView();
   };
 
-  #newEventCancelButtonClickHandler = () => {
+  #newEventCancelButtonClickHandler = async () => {
     if (this.#newPointView) {
       remove(this.#newPointView);
       this.#newPointView = null;
@@ -120,8 +120,12 @@ export default class NewPointPresenter {
     this.#newEventButtonView = newEventButtonView;
   }
 
-  #newPointSubmitHandler = (data) => {
-    this.#routeModelDispatch(
+  /**
+   * Save event
+   * @param { RoutePointDto } data
+   */
+  #newPointSubmitHandler = async (data) => {
+    await this.#routeModelDispatch(
       UserActions.ADD_NEW_POINT,
       ModelActions.MAJOR_UPDATE,
       data
@@ -217,7 +221,11 @@ export default class NewPointPresenter {
  * @param { UserActions } userAction
  * @param { ModelActions } modelActionType
  * @param { RoutePointDto } data
- * @returns { void }
+ * @returns { Promise<void> }
+ */
+
+/**
+ * @typedef { import('../service/data-transfer-object-service').RoutePointDto } RoutePointDto
  */
 
 /**
