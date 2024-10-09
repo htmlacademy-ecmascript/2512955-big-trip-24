@@ -110,8 +110,36 @@ export default class EditEventFormView extends EncodedStatefulView {
    */
   #deleteButtonClickHandler = (event) => {
     event.preventDefault();
-    this.#onDeleteCallback(EditEventFormView.convertStateToData(this._state));
-    this.#destroyFlatPickers();
+    if (!this.#isNewEvent) {
+      this.#setDeleting();
+    }
+    this.#onDeleteCallback(EditEventFormView.convertStateToData(this._state))
+      .then(() => {
+        this.#destroyFlatPickers();
+        this.#restoreFlags();
+      })
+      .catch(() => {
+        this.shake(this.#restoreFlags);
+      });
+  };
+
+  #setSaving = () => {
+    this.updateElement({
+      isSaving: true
+    });
+  };
+
+  #setDeleting = () => {
+    this.updateElement({
+      isDeleting: true
+    });
+  };
+
+  #restoreFlags = () => {
+    this.updateElement({
+      isSaving: false,
+      isDeleting: false
+    });
   };
 
   /**
@@ -120,8 +148,15 @@ export default class EditEventFormView extends EncodedStatefulView {
    */
   #submitFormHandler = (event) => {
     event.preventDefault();
-    this.#onSubmitCallback(EditEventFormView.convertStateToData(this._state));
-    this.#destroyFlatPickers();
+    this.#setSaving();
+    this.#onSubmitCallback(EditEventFormView.convertStateToData(this._state))
+      .then(() => {
+        this.#destroyFlatPickers();
+        this.#restoreFlags();
+      })
+      .catch(() => {
+        this.shake(this.#restoreFlags);
+      });
   };
 
   /**
@@ -150,10 +185,17 @@ export default class EditEventFormView extends EncodedStatefulView {
       const offer = this._state.fullOffers.find((current) => current.id === offerId);
 
       if (offer) {
-        this.updateElement({
+        this._setState({
           offers: element?.checked ? [...this._state.offers, offer] : this._state.offers.filter((current) => current.id !== offer.id)
         });
       }
+
+      if (element?.checked) {
+        element.setAttribute('checked', true);
+        return;
+      }
+
+      element.removeAttribute('checked');
     }
   };
 
@@ -244,7 +286,9 @@ export default class EditEventFormView extends EncodedStatefulView {
     return {
       ...data,
       fullDestinations,
-      fullOffers
+      fullOffers,
+      isDeleting: false,
+      isSaving: false
     };
   }
 
@@ -260,6 +304,8 @@ export default class EditEventFormView extends EncodedStatefulView {
 
     delete dataObject.fullDestinations;
     delete dataObject.fullOffers;
+    delete dataObject.isDeleting;
+    delete dataObject.isSaving;
 
     return dataObject;
   }
@@ -279,6 +325,8 @@ export default class EditEventFormView extends EncodedStatefulView {
  * @typedef { Object } EditEventFormViewAdditionalState
  * @property { OfferDto[] } EditEventFormViewAdditionalState.fullOffers
  * @property { DestinationDto[] } EditEventFormViewAdditionalState.fullDestinations
+ * @property { boolean } EditEventFormViewAdditionalState.isSaving
+ * @property { boolean } EditEventFormViewAdditionalState.isDeleting
  */
 
 /**
@@ -304,13 +352,13 @@ export default class EditEventFormView extends EncodedStatefulView {
 /**
  * @callback OnSubmitCallback
  * @param { RoutePointDto } routePoint
- * @returns { void }
+ * @returns { Promise<void> }
  */
 
 /**
  * @callback OnDeleteCallback
  * @param { RoutePointDto } routePoint
- * @returns { void }
+ * @returns { Promise<void> }
  */
 
 /**

@@ -91,7 +91,7 @@ export default class RouteApiService extends ApiService {
    */
   async deleteRoutePoint(routePoint) {
     const endpoint = `points/${routePoint.id}`;
-    this._load({
+    await this._load({
       url: endpoint,
       method: HttpMethods.DELETE
     });

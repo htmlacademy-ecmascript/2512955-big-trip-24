@@ -2,12 +2,22 @@ import { dayjs } from '../../../utills/time';
 import { getTimePartsByMinutes } from '../../../utills/time';
 import { DateFormats } from '../../../config/date-format';
 
+/**
+ * @param { number } value
+ * @param { string } unit
+ * @returns { string }
+ */
+const getTimePartString = (value, unit) => {
+  const stringifiedValue = value < 10 ? `0${value}` : value;
+  return `${stringifiedValue}${unit.toUpperCase()}`;
+};
+
 const getEventLengthString = ({ days, hours, minutes }) => {
   let result = '';
 
   const concatTimePart = (value, unit) => {
-    if (value > 0) {
-      result = `${result} ${value}${unit.toUpperCase()}`;
+    if (result || value > 0) {
+      result = `${result} ${getTimePartString(value, unit)}`;
     }
   };
 

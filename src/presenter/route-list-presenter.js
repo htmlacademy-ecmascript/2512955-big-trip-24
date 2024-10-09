@@ -300,5 +300,5 @@ export default class RouteListPresenter {
  * @param { UserActions } userAction User action type
  * @param { ModelActions } modelAction Model action type
  * @param { RoutePointDto } payload Action payload
- * @returns { void }
+ * @returns { Promise<void> }
 */

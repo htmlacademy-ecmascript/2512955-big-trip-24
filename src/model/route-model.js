@@ -40,9 +40,14 @@ export default class RouteModel extends Model {
    * @param { ModelActions } modelActionType
    * @param { RoutePointModelData } routePoint
    */
-  deleteRoutePoint(modelActionType, routePoint) {
-    this.data = this.data.filter((current) => current.id !== routePoint.id);
-    this._notify(modelActionType, routePoint);
+  async deleteRoutePoint(modelActionType, routePoint) {
+    try {
+      await this._api.deleteRoutePoint(ServerDataAdapter.adaptRoutePointToServer(routePoint));
+      this.data = this.data.filter((current) => current.id !== routePoint.id);
+      this._notify(modelActionType, routePoint);
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t delete route point');
+    }
   }
 
   /**
@@ -50,15 +55,15 @@ export default class RouteModel extends Model {
    * @param { ModelActions } modelActionType
    * @param { RoutePointModelData } routePoint
    */
-  addNewRoutePoint(modelActionType, routePoint) {
-    //TODO: Выпилить костыльный ID
-    const fixedRoutePoint = {
-      ...routePoint,
-      id: crypto.randomUUID()
-    };
-    //TODO
-    this.data = [...this.data, fixedRoutePoint];
-    this._notify(modelActionType, fixedRoutePoint);
+  async addNewRoutePoint(modelActionType, routePoint) {
+    try {
+      const addedRoutePoint = await this._api.createRoutePoint(ServerDataAdapter.adaptRoutePointToServer(routePoint));
+      const adaptedRoutePoint = ServerDataAdapter.adaptRoutePointToModel(addedRoutePoint);
+      this.data = [...this.data, adaptedRoutePoint];
+      this._notify(modelActionType, adaptedRoutePoint);
+    } catch(err) {
+      throw new Error(err?.message ?? 'Can\'t add route point');
+    }
   }
 
   /**

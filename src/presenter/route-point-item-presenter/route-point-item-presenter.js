@@ -98,8 +98,8 @@ export default class RoutePointItemPresenter extends Presenter {
    * Delete route point
    * @param { RoutePointDto } routePoint
    */
-  #deleteButtonClickHandler = (routePoint) => {
-    this.#routeModelDispatch(
+  #deleteButtonClickHandler = async (routePoint) => {
+    await this.#routeModelDispatch(
       UserActions.DELETE_POINT,
       ModelActions.MINOR_UPDATE,
       routePoint
@@ -109,8 +109,8 @@ export default class RoutePointItemPresenter extends Presenter {
   /**
    * Favorite change
    */
-  #favoriteButtonClickHandler = () => {
-    this.#routeModelDispatch(
+  #favoriteButtonClickHandler = async () => {
+    await this.#routeModelDispatch(
       UserActions.UPDATE_POINT,
       ModelActions.PATCH,
       {
@@ -125,8 +125,8 @@ export default class RoutePointItemPresenter extends Presenter {
    * Submit route point changes
    * @param { RoutePointDto } routePointDto
    */
-  #editFormSubmitHandler = (routePointDto) => {
-    this.#routeModelDispatch(
+  #editFormSubmitHandler = async (routePointDto) => {
+    await this.#routeModelDispatch(
       UserActions.UPDATE_POINT,
       this.#getModelActionTypeByUpdateRoutePointAction(routePointDto),
       routePointDto
@@ -267,7 +267,7 @@ export default class RoutePointItemPresenter extends Presenter {
  * @param { UserActions } userAction
  * @param { ModelActions } modelActionType
  * @param { RoutePointDto } data
- * @returns { void }
+ * @returns { Promise<void> }
  */
 
 /**
