@@ -188,14 +188,14 @@ export default class EditEventFormView extends EncodedStatefulView {
         this._setState({
           offers: element?.checked ? [...this._state.offers, offer] : this._state.offers.filter((current) => current.id !== offer.id)
         });
-      }
 
-      if (element?.checked) {
-        element.setAttribute('checked', true);
-        return;
-      }
+        if (element?.checked) {
+          element.setAttribute('checked', true);
+          return;
+        }
 
-      element.removeAttribute('checked');
+        element.removeAttribute('checked');
+      }
     }
   };
 
@@ -246,20 +246,6 @@ export default class EditEventFormView extends EncodedStatefulView {
 
   #setFlatPickers() {
     this.#destroyFlatPickers();
-    this.#dateToPicker = flatpickr(
-      this.element.querySelector(`#event-end-time-${this._state.id}`),
-      {
-        onClose: this.#dateSelectHandler,
-        dateFormat: DateFormats.FLATPICKR_FORMAT,
-        defaultDate: this._state.dateTo,
-        minDate: this._state.dateFrom,
-        parseDate: flatpickrUTCDateParser,
-        // eslint-disable-next-line camelcase
-        time_24hr: true,
-        enableTime: true,
-      }
-    );
-
     this.#dateFromPicker = flatpickr(
       this.element.querySelector(`#event-start-time-${this._state.id}`),
       {
@@ -271,6 +257,20 @@ export default class EditEventFormView extends EncodedStatefulView {
         // eslint-disable-next-line camelcase
         time_24hr: true,
         enableTime: true
+      }
+    );
+
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector(`#event-end-time-${this._state.id}`),
+      {
+        onClose: this.#dateSelectHandler,
+        dateFormat: DateFormats.FLATPICKR_FORMAT,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        parseDate: flatpickrUTCDateParser,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        enableTime: true,
       }
     );
   }

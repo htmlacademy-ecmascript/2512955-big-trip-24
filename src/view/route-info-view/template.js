@@ -48,7 +48,15 @@ export const getRouteInfoViewTemplate = (data) => {
     return '';
   }
   const dateFrom = dayjs(data.dateFrom);
+  dateFrom.set('h', 0);
+  dateFrom.set('m', 0);
+  dateFrom.set('s', 0);
+  dateFrom.set('milliseconds', 0);
   const dateTo = dayjs(data.dateTo);
+  dateTo.set('h', 0);
+  dateTo.set('m', 0);
+  dateTo.set('s', 0);
+  dateTo.set('milliseconds', 0);
   return `
     <section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">
