@@ -5,6 +5,8 @@ import DataTransferObjectService from '../service/data-transfer-object-service';
 import { ModelActions, UserActions } from '../service/actions';
 import { DEFAULT_FILTER_TYPE } from '../config/filter-types';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
+import AbstractView from '../framework/view/abstract-view';
+import { EventsListItemView } from '../view/events-list-view';
 
 export default class NewPointPresenter {
   /**
@@ -87,11 +89,20 @@ export default class NewPointPresenter {
     this.#sortModel = sortModel;
   }
 
+  #asEventListItem(view) {
+    if (view instanceof AbstractView) {
+      const listItemView = new EventsListItemView();
+      render(view, listItemView.element);
+      return listItemView;
+    }
+  }
+
   #newEventButtonClickHandler = () => {
     this.#filterModel.changeFilter(ModelActions.MINOR_UPDATE, DEFAULT_FILTER_TYPE);
     this.#sortModel.changeSort(ModelActions.MINOR_UPDATE, DEFAULT_SORTING_TYPE);
     this.#onNewEventButtonClickCallback();
-    this.#renderNewEventButtonView(true);
+    //this.#renderNewEventButtonView(true);
+    this.setDisabledAttribute(true);
     this.#renderNewEventView();
   };
 
@@ -101,7 +112,8 @@ export default class NewPointPresenter {
       this.#newPointView = null;
     }
     this.#onNewEventCancelCallback();
-    this.#renderNewEventButtonView();
+    this.setDisabledAttribute(false);
+    //this.#renderNewEventButtonView();
     document.removeEventListener('keydown', this.#escapeKeydownHandler);
   };
 
@@ -125,12 +137,17 @@ export default class NewPointPresenter {
    * @param { RoutePointDto } data
    */
   #newPointSubmitHandler = async (data) => {
-    await this.#routeModelDispatch(
-      UserActions.ADD_NEW_POINT,
-      ModelActions.MAJOR_UPDATE,
-      data
-    );
-    this.#renderNewEventButtonView();
+    this.setDisabledAttribute(true);
+    try {
+      await this.#routeModelDispatch(
+        UserActions.ADD_NEW_POINT,
+        ModelActions.MAJOR_UPDATE,
+        data
+      );
+    } finally {
+      this.setDisabledAttribute(false);
+    }
+    //this.#renderNewEventButtonView();
     document.removeEventListener('keydown', this.#escapeKeydownHandler);
   };
 
@@ -159,13 +176,13 @@ export default class NewPointPresenter {
   #renderNewEventView() {
     const container = this.#listView.element;
     const routePointTemplate = DataTransferObjectService.getNewRoutePointDto();
-    const newEventView = new EditEventFormView({
+    const newEventView = this.#asEventListItem(new EditEventFormView({
       routePoint: routePointTemplate,
       getDestinations: () => this.#destinationModel.data,
       getOffers: (eventType) => this.#offerModel.getOffersByEventType(eventType),
       onSubmit: this.#newPointSubmitHandler,
       onDelete: this.#newEventCancelButtonClickHandler
-    });
+    }));
 
     if (this.#newPointView) {
       replace(newEventView, this.#newPointView);

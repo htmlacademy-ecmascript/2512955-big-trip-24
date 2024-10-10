@@ -5,6 +5,7 @@ import { filterTypeByFunction } from '../utills/filter';
 import { sortingTypeByFunction } from '../utills/sorting';
 import RoutePointItemPresenter from './route-point-item-presenter';
 import { ModelActions } from '../service/actions';
+
 /**
  * Route list presenter
  */
