@@ -1,12 +1,13 @@
 import NewEventButtonView from '../view/new-event-button-view/new-event-button-view';
 import EditEventFormView from '../view/events/edit-event-form-view';
-import { remove, render, RenderPosition, replace } from '../framework/render';
+import { remove, render, RenderPosition } from '../framework/render';
 import DataTransferObjectService from '../service/data-transfer-object-service';
 import { ModelActions, UserActions } from '../service/actions';
 import { DEFAULT_FILTER_TYPE } from '../config/filter-types';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
 import AbstractView from '../framework/view/abstract-view';
 import { EventsListItemView } from '../view/events-list-view';
+import { renderOrReplace } from '../utills/view';
 
 export default class NewPointPresenter {
   /**
@@ -122,13 +123,7 @@ export default class NewPointPresenter {
       onClick: this.#newEventButtonClickHandler
     });
 
-    if (this.#newEventButtonView) {
-      replace(newEventButtonView, this.#newEventButtonView);
-      remove(this.#newEventButtonView);
-    } else {
-      render(newEventButtonView, this.#rootElement);
-    }
-
+    renderOrReplace(newEventButtonView, this.#newEventButtonView, this.#rootElement);
     this.#newEventButtonView = newEventButtonView;
   }
 
@@ -138,16 +133,12 @@ export default class NewPointPresenter {
    */
   #newPointSubmitHandler = async (data) => {
     this.setDisabledAttribute(true);
-    try {
-      await this.#routeModelDispatch(
-        UserActions.ADD_NEW_POINT,
-        ModelActions.MAJOR_UPDATE,
-        data
-      );
-    } finally {
-      this.setDisabledAttribute(false);
-    }
-    //this.#renderNewEventButtonView();
+    await this.#routeModelDispatch(
+      UserActions.ADD_NEW_POINT,
+      ModelActions.MAJOR_UPDATE,
+      data
+    );
+    this.setDisabledAttribute(false);
     document.removeEventListener('keydown', this.#escapeKeydownHandler);
   };
 
@@ -184,13 +175,7 @@ export default class NewPointPresenter {
       onDelete: this.#newEventCancelButtonClickHandler
     }));
 
-    if (this.#newPointView) {
-      replace(newEventView, this.#newPointView);
-      remove(this.#newPointView);
-      this.#newPointView = null;
-    }
-
-    render(newEventView, container, RenderPosition.AFTERBEGIN);
+    renderOrReplace(newEventView, this.#newPointView, container, RenderPosition.AFTERBEGIN);
     this.#newPointView = newEventView;
 
     document.addEventListener('keydown', this.#escapeKeydownHandler);

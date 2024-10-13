@@ -1,7 +1,7 @@
 import RouteListPresenter from './route-list-presenter';
 import HeaderPresenter from './header-presenter';
 import EventsMessageView from '../view/events-message-view';
-import { remove, render, RenderPosition, replace } from '../framework/render';
+import { remove, render } from '../framework/render';
 import SortPresenter from './sort-presenter';
 import FilterPresenter from './filter-presenter';
 import NewPointPresenter from './new-point-presenter';
@@ -9,6 +9,7 @@ import { UserActions } from '../service/actions';
 import DataTransferObjectService from '../service/data-transfer-object-service';
 import UiBlocker from '../framework/ui-blocker/ui-blocker';
 import { TimeLimits } from '../config/blocker';
+import { renderOrReplace } from '../utills/view';
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
@@ -168,12 +169,7 @@ export default class RootPresenter {
   #renderMessage = (message) => {
     const messageView = new EventsMessageView({ message });
 
-    if (this.#messageView) {
-      replace(messageView, this.#messageView);
-    } else {
-      render(messageView, tripEventsElement, RenderPosition.BEFOREEND);
-    }
-
+    renderOrReplace(messageView, this.#messageView, tripEventsElement);
     this.#messageView = messageView;
   };
 

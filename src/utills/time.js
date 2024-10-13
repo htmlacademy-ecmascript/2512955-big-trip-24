@@ -7,16 +7,8 @@ dayjsLib.extend(timezone);
 dayjsLib.tz.setDefault('GMT');
 const dayjs = dayjsLib.utc;
 
-/**
- * @typedef { Object } TimePartsObject
- * @property { number } TimePartsObject.days
- * @property { number } TimePartsObject.hours
- * @property { number } TimePartsObject.minutes
- */
-
 const MINUTES_IN_ONE_HOUR = 60;
 const HOURS_IN_ONE_DAY = 24;
-
 const MILLISECONDS_IN_ONE_MINUTE = 60000;
 
 /**
@@ -61,3 +53,10 @@ export const flatpickrUTCDateParser = (date) => {
 export {
   dayjs,
 };
+
+/**
+ * @typedef { Object } TimePartsObject
+ * @property { number } TimePartsObject.days
+ * @property { number } TimePartsObject.hours
+ * @property { number } TimePartsObject.minutes
+ */

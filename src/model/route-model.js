@@ -102,7 +102,7 @@ export default class RouteModel extends Model {
       const result = {
         totalBasePrice: 0,
         offers: [],
-        routeDateTo: sortedData[sortedData.length - 1].dateFrom,
+        routeDateTo: sortedData[sortedData.length - 1].dateTo,
         routeDateFrom: sortedData[0].dateFrom,
         destinationIds: []
       };

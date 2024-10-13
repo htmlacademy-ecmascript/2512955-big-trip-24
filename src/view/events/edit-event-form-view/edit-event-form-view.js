@@ -225,7 +225,7 @@ export default class EditEventFormView extends EncodedStatefulView {
     this.element.addEventListener('submit', this.#submitFormHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
 
-    this.element.querySelector('.event__input--destination').addEventListener('blur', this.#destinationSelectHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('focusout', this.#destinationSelectHandler);
 
     if (this._state.fullOffers?.length ?? 0 > 0) {
       this.element.querySelector('.event__section--offers').addEventListener('change', this.#offerInputChangeHandler);
@@ -235,7 +235,7 @@ export default class EditEventFormView extends EncodedStatefulView {
       this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupButtonClickHandler);
     }
 
-    this.element.querySelector('.event__input--price').addEventListener('blur', this.#priceInputBlurHandler);
+    this.element.querySelector('.event__input--price').addEventListener('focusout', this.#priceInputBlurHandler);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteButtonClickHandler);
   }
 
