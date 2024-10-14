@@ -4,11 +4,10 @@ import { DateFormats } from '../config/date-format';
 
 /**
  * Default filter
- * @param { Date } date Now date
  * @param { RoutePointModelData[] } routePoints Route points data in model
  * @returns { RoutePointModelData[] } Filtered route points
  */
-const everythingFilter = (date, routePoints) => routePoints;
+const everythingFilter = (_, routePoints) => routePoints;
 
 /**
  * Future points filter
