@@ -172,7 +172,7 @@ export default class EditEventFormView extends EncodedStatefulView {
   #priceInputBlurHandler = (event) => {
     event.preventDefault();
     this.updateElement({
-      basePrice: /^\d*$/.test(event.target.value) ? Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX) : this._state.basePrice
+      basePrice: event.target.value && /^\d*$/.test(event.target.value) ? Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX) : this._state.basePrice
     });
   };
 

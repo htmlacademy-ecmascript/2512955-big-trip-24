@@ -136,7 +136,7 @@ export default class DataTransferObjectService {
       basePrice,
       dateFrom,
       dateTo,
-      destination: destination.id,
+      destination: destination?.id ? destination.id : null,
       isFavorite,
       type,
       offers: offers.map((current) => current.id)
