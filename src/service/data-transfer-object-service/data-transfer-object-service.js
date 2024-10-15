@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { NEW_ROUTE_POINT_DTO } from './defaults';
 
 /**
