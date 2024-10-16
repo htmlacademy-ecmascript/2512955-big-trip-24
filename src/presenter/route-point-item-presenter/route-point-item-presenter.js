@@ -1,18 +1,27 @@
-import Presenter from '../../shared/presenter';
 import { DEFAULT_VIEW_MODE, ViewModes } from './view-mode';
-import { remove, render, replace } from '../../framework/render';
+import { remove } from '../../framework/render';
 import EditEventFormView from '../../view/events/edit-event-form-view';
 import EventInfoView from '../../view/events/event-info-view';
 import DataTransferObjectService from '../../service/data-transfer-object-service';
 import AbstractView from '../../framework/view/abstract-view';
-import { EventsListItemView } from '../../view/events-list-view';
 import { ModelActions, UserActions } from '../../service/actions';
+import { asEventListItemView, renderOrReplace } from '../../utills/view';
 
-export default class RoutePointItemPresenter extends Presenter {
+export default class RoutePointItemPresenter {
   /**
    * @type { RoutePointDto }
    */
   #routePoint = null;
+
+  /**
+   * @type { OfferModel }
+   */
+  #offerModel = null;
+
+  /**
+   * @type { RouteDestinationModel }
+   */
+  #routeDestinationModel = null;
 
   /**
    * @type { AbstractView }
@@ -28,6 +37,10 @@ export default class RoutePointItemPresenter extends Presenter {
    * @type { ViewModes }
    */
   #viewMode = DEFAULT_VIEW_MODE;
+
+  /**
+   * @type { () => void }
+   */
   #rollupButtonClickCallback = null;
 
   /**
@@ -37,22 +50,15 @@ export default class RoutePointItemPresenter extends Presenter {
 
   /**
    * Presenter constructor
-   * @param { RoutePointItemConstructorParams } presenterParams
+   * @param { RoutePountPresenterParams } presenterParams
    */
-  constructor({ rootElement, routePoint, routeModelDispatch, onRollupClick, ...presenterParams }) {
-    super(presenterParams);
+  constructor({ rootElement, routePoint, routeModelDispatch, onRollupClick, destinationModel, offerModel }) {
     this.#rootElement = rootElement;
     this.#routePoint = routePoint;
     this.#routeModelDispatch = routeModelDispatch;
     this.#rollupButtonClickCallback = onRollupClick;
-  }
-
-  #asEventListItem(view) {
-    if (view instanceof AbstractView) {
-      const listItemView = new EventsListItemView();
-      render(view, listItemView.element);
-      return listItemView;
-    }
+    this.#offerModel = offerModel;
+    this.#routeDestinationModel = destinationModel;
   }
 
   /**
@@ -61,13 +67,8 @@ export default class RoutePointItemPresenter extends Presenter {
    */
   #renderView(view) {
     if (view instanceof AbstractView) {
-      const listItemView = this.#asEventListItem(view);
-      if (this.#itemView) {
-        replace(listItemView, this.#itemView);
-        remove(this.#itemView);
-      } else {
-        render(listItemView, this.#rootElement);
-      }
+      const listItemView = asEventListItemView(view);
+      renderOrReplace(listItemView, this.#itemView, this.#rootElement);
       this.#itemView = listItemView;
     }
   }
@@ -151,10 +152,10 @@ export default class RoutePointItemPresenter extends Presenter {
   #createEditView() {
     return new EditEventFormView({
       routePoint: this.#routePoint,
-      getOffers: (eventType) => this._offerModel
+      getOffers: (eventType) => this.#offerModel
         .getOffersByEventType(eventType)
         .map((current) => DataTransferObjectService.getOfferDto(current)),
-      getDestinations: () => this._routeDestinationModel.data.map((current) => DataTransferObjectService.getDestinationDto(current)),
+      getDestinations: () => this.#routeDestinationModel.data.map((current) => DataTransferObjectService.getDestinationDto(current)),
       onRollupButtonClick: () => {
         this.#replaceEditViewToInfoView();
       },
@@ -239,15 +240,13 @@ export default class RoutePointItemPresenter extends Presenter {
  */
 
 /**
- * @typedef { import('../../shared/presenter').PresenterConstructorParams } PresenterConstructorParams
- */
-
-/**
- * @typedef { Object } RoutePountPresenterAdditionalParams
- * @property { RoutePointDto } RoutePountPresenterAdditionalParams.routePoint
- * @property { HTMLElement } RoutePountPresenterAdditionalParams.rootElement
- * @property { () => void } RoutePountPresenterAdditionalParams.onRollupClick
- * @property { RouteModelDispatch } RoutePountPresenterAdditionalParams.routeModelDispatch
+ * @typedef { Object } RoutePountPresenterParams
+ * @property { RoutePointDto } RoutePountPresenterParams.routePoint
+ * @property { HTMLElement } RoutePountPresenterParams.rootElement
+ * @property { () => void } RoutePountPresenterParams.onRollupClick
+ * @property { RouteModelDispatch } RoutePountPresenterParams.routeModelDispatch
+ * @property { OfferModel } RoutePountPresenterParams.offerModel
+ * @property { RouteDestinationModel } RoutePountPresenterParams.destinationModel
  */
 
 /**
@@ -263,13 +262,17 @@ export default class RoutePointItemPresenter extends Presenter {
  */
 
 /**
+ * @typedef { import('../../model/offer-model').default } OfferModel
+ */
+
+/**
+ * @typedef { import('../../model/route-destination-model').default } RouteDestinationModel
+ */
+
+/**
  * @callback RouteModelDispatch
  * @param { UserActions } userAction
  * @param { ModelActions } modelActionType
  * @param { RoutePointDto } data
  * @returns { Promise<void> }
- */
-
-/**
- * @typedef { PresenterConstructorParams & RoutePountPresenterAdditionalParams } RoutePointItemConstructorParams
  */

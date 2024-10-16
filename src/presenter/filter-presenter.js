@@ -2,7 +2,7 @@ import EventsFilterFormView from '../view/events-filter-form-view';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
 import { ModelActions } from '../service/actions';
 import { filterTypeByFunction } from '../utills/filter';
-import { remove, render, replace } from '../framework/render';
+import { renderOrReplace } from '../utills/view';
 
 export default class FilterPresenter {
   /**
@@ -77,14 +77,7 @@ export default class FilterPresenter {
       activeFilterType: this.#filterModel.filterType,
       filtersRecordCountInfo: this.#routeModel.getRoutesCountByFilters(filterTypeByFunction, new Date())
     });
-
-    if (this.#filterView) {
-      replace(newFilterView, this.#filterView);
-      remove(this.#filterView);
-    } else {
-      render(newFilterView, this.#rootElement);
-    }
-
+    renderOrReplace(newFilterView, this.#filterView, this.#rootElement);
     this.#filterView = newFilterView;
   }
 

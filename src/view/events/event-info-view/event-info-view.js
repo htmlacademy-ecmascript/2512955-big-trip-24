@@ -57,7 +57,8 @@ export default class EventInfoView extends AbstractView {
    */
   #onFavoriteButtonClick = (event) => {
     event.preventDefault();
-    this.#onFavoriteButtonClickCallback();
+    this.#onFavoriteButtonClickCallback()
+      .catch(() => this.shake());
   };
 }
 
@@ -79,5 +80,5 @@ export default class EventInfoView extends AbstractView {
 
 /**
  * @callback OnFavoriteButtonClickCallback
- * @returns { void }
+ * @returns { Promise<void> }
  */

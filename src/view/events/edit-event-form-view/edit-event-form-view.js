@@ -172,7 +172,7 @@ export default class EditEventFormView extends EncodedStatefulView {
   #priceInputBlurHandler = (event) => {
     event.preventDefault();
     this.updateElement({
-      basePrice: /^\d*$/.test(event.target.value) ? Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX) : this._state.basePrice
+      basePrice: event.target.value && /^\d*$/.test(event.target.value) ? Number.parseInt(event.target.value, DEFAULT_PARSE_RADIX) : this._state.basePrice
     });
   };
 
@@ -188,14 +188,14 @@ export default class EditEventFormView extends EncodedStatefulView {
         this._setState({
           offers: element?.checked ? [...this._state.offers, offer] : this._state.offers.filter((current) => current.id !== offer.id)
         });
-      }
 
-      if (element?.checked) {
-        element.setAttribute('checked', true);
-        return;
-      }
+        if (element?.checked) {
+          element.setAttribute('checked', true);
+          return;
+        }
 
-      element.removeAttribute('checked');
+        element.removeAttribute('checked');
+      }
     }
   };
 
@@ -225,7 +225,7 @@ export default class EditEventFormView extends EncodedStatefulView {
     this.element.addEventListener('submit', this.#submitFormHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
 
-    this.element.querySelector('.event__input--destination').addEventListener('blur', this.#destinationSelectHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('focusout', this.#destinationSelectHandler);
 
     if (this._state.fullOffers?.length ?? 0 > 0) {
       this.element.querySelector('.event__section--offers').addEventListener('change', this.#offerInputChangeHandler);
@@ -235,7 +235,7 @@ export default class EditEventFormView extends EncodedStatefulView {
       this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupButtonClickHandler);
     }
 
-    this.element.querySelector('.event__input--price').addEventListener('blur', this.#priceInputBlurHandler);
+    this.element.querySelector('.event__input--price').addEventListener('focusout', this.#priceInputBlurHandler);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteButtonClickHandler);
   }
 
@@ -246,20 +246,6 @@ export default class EditEventFormView extends EncodedStatefulView {
 
   #setFlatPickers() {
     this.#destroyFlatPickers();
-    this.#dateToPicker = flatpickr(
-      this.element.querySelector(`#event-end-time-${this._state.id}`),
-      {
-        onClose: this.#dateSelectHandler,
-        dateFormat: DateFormats.FLATPICKR_FORMAT,
-        defaultDate: this._state.dateTo,
-        minDate: this._state.dateFrom,
-        parseDate: flatpickrUTCDateParser,
-        // eslint-disable-next-line camelcase
-        time_24hr: true,
-        enableTime: true,
-      }
-    );
-
     this.#dateFromPicker = flatpickr(
       this.element.querySelector(`#event-start-time-${this._state.id}`),
       {
@@ -271,6 +257,20 @@ export default class EditEventFormView extends EncodedStatefulView {
         // eslint-disable-next-line camelcase
         time_24hr: true,
         enableTime: true
+      }
+    );
+
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector(`#event-end-time-${this._state.id}`),
+      {
+        onClose: this.#dateSelectHandler,
+        dateFormat: DateFormats.FLATPICKR_FORMAT,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        parseDate: flatpickrUTCDateParser,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        enableTime: true,
       }
     );
   }

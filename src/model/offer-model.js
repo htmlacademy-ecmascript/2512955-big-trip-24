@@ -1,6 +1,8 @@
 import Model from '../shared/model';
 import ServerDataAdapter from '../service/server-data-adapter';
 
+const DEFAULT_INIT_ERROR_MESSAGE = 'Can\'t init offers model';
+
 /**
  * OfferModel
  * @extends { Model<OfferByTypeModelData[], RouteApiService> }
@@ -18,7 +20,7 @@ export default class OfferModel extends Model {
       const serverData = await this._api.getOffers();
       this.data = serverData.map((current) => ServerDataAdapter.adaptOffersByTypeToModel(current));
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t init offers model');
+      throw new Error(err?.message ?? DEFAULT_INIT_ERROR_MESSAGE);
     }
   }
 

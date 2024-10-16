@@ -1,12 +1,11 @@
 import RouteInfoView from '../view/route-info-view';
 import {
   remove,
-  render,
   RenderPosition,
-  replace
 } from '../framework/render';
 import DataTransferObjectService from '../service/data-transfer-object-service';
 import { ModelActions } from '../service/actions';
+import { renderOrReplace } from '../utills/view';
 
 export default class HeaderPresenter {
   /**
@@ -69,12 +68,7 @@ export default class HeaderPresenter {
 
     if (routeTotalInfo) {
       const newRouteInfoView = new RouteInfoView({ data: routeTotalInfo });
-      if (this.#routeInfoView) {
-        replace(newRouteInfoView, this.#routeInfoView);
-        remove(this.#routeInfoView);
-      } else {
-        render(newRouteInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
-      }
+      renderOrReplace(newRouteInfoView, this.#routeInfoView, this.#rootElement, RenderPosition.AFTERBEGIN);
 
       this.#routeInfoView = newRouteInfoView;
 

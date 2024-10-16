@@ -30,7 +30,7 @@ const getHeaderTemplate = ({ destinationNames }) => {
  * @returns { string }
  */
 const getRouteLengthTemplate = (dateTo, dateFrom) => {
-  const dateDifference = dateTo.diff(dateFrom);
+  const dateDifference = dateTo.diff(dateFrom,'date');
   return `
     <p class="trip-info__dates">
       ${dateFrom.format(DateFormats.DAY_MONTH_FORMAT).replace(':', ' ')}

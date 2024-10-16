@@ -1,6 +1,8 @@
 import ServerDataAdapter from '../service/server-data-adapter';
 import Model from '../shared/model';
 
+const DEFAULT_INIT_ERROR_MESSAGE = 'Can\'t init destination model';
+
 /**
  * RouteDestinationModel
  * @extends { Model<DestinationModelData[], RouteApiService> }
@@ -28,7 +30,7 @@ export default class RouteDestinationModel extends Model {
       const serverData = await this._api.getDestinations();
       this.data = serverData.map((current) => ServerDataAdapter.adaptDestinationToModel(current));
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t init destination model');
+      throw new Error(err?.message ?? DEFAULT_INIT_ERROR_MESSAGE);
     }
   }
 }

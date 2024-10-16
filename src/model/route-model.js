@@ -5,6 +5,13 @@ import { updateItem } from '../utills/array';
 import ServerDataAdapter from '../service/server-data-adapter';
 import { ModelActions } from '../service/actions';
 
+const DefaultErrorMessages = {
+  ADD_ERROR: 'Can\'t add route point',
+  UPDATE_ERROR: 'Can\'t update route point',
+  DELETE_ERROR: 'Can\'t delete route point',
+  INIT_ERROR: 'Can\'t init route model'
+};
+
 /**
  * @extends { Model<RoutePointModelData[], RouteApiService> } Route model
  */
@@ -22,7 +29,7 @@ export default class RouteModel extends Model {
       this.data = serverData.map((current) => ServerDataAdapter.adaptRoutePointToModel(current));
       this._notify(ModelActions.INIT);
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t init route model');
+      throw new Error(err?.message ?? DefaultErrorMessages.INIT_ERROR);
     }
   }
 
@@ -46,7 +53,7 @@ export default class RouteModel extends Model {
       this.data = this.data.filter((current) => current.id !== routePoint.id);
       this._notify(modelActionType, routePoint);
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t delete route point');
+      throw new Error(err?.message ?? DefaultErrorMessages.DELETE_ERROR);
     }
   }
 
@@ -62,7 +69,7 @@ export default class RouteModel extends Model {
       this.data = [...this.data, adaptedRoutePoint];
       this._notify(modelActionType, adaptedRoutePoint);
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t add route point');
+      throw new Error(err?.message ?? DefaultErrorMessages.ADD_ERROR);
     }
   }
 
@@ -83,7 +90,7 @@ export default class RouteModel extends Model {
       this.data = updateItem(this.data, adaptedItemToModel, routeCompareFunction);
       this._notify(modelActionType, adaptedItemToModel);
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t update route point');
+      throw new Error(err?.message ?? DefaultErrorMessages.UPDATE_ERROR);
     }
   }
 
@@ -102,7 +109,7 @@ export default class RouteModel extends Model {
       const result = {
         totalBasePrice: 0,
         offers: [],
-        routeDateTo: sortedData[sortedData.length - 1].dateFrom,
+        routeDateTo: sortedData[sortedData.length - 1].dateTo,
         routeDateFrom: sortedData[0].dateFrom,
         destinationIds: []
       };

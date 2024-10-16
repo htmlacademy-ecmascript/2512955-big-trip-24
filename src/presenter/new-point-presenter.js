@@ -1,10 +1,12 @@
 import NewEventButtonView from '../view/new-event-button-view/new-event-button-view';
 import EditEventFormView from '../view/events/edit-event-form-view';
-import { remove, render, RenderPosition, replace } from '../framework/render';
+import { remove, RenderPosition } from '../framework/render';
 import DataTransferObjectService from '../service/data-transfer-object-service';
 import { ModelActions, UserActions } from '../service/actions';
 import { DEFAULT_FILTER_TYPE } from '../config/filter-types';
 import { DEFAULT_SORTING_TYPE } from '../config/sorting-types';
+import { asEventListItemView, renderOrReplace } from '../utills/view';
+import { isEscapeKey } from '../utills/event';
 
 export default class NewPointPresenter {
   /**
@@ -91,7 +93,7 @@ export default class NewPointPresenter {
     this.#filterModel.changeFilter(ModelActions.MINOR_UPDATE, DEFAULT_FILTER_TYPE);
     this.#sortModel.changeSort(ModelActions.MINOR_UPDATE, DEFAULT_SORTING_TYPE);
     this.#onNewEventButtonClickCallback();
-    this.#renderNewEventButtonView(true);
+    this.setDisabledAttribute(true);
     this.#renderNewEventView();
   };
 
@@ -101,7 +103,7 @@ export default class NewPointPresenter {
       this.#newPointView = null;
     }
     this.#onNewEventCancelCallback();
-    this.#renderNewEventButtonView();
+    this.setDisabledAttribute(false);
     document.removeEventListener('keydown', this.#escapeKeydownHandler);
   };
 
@@ -110,13 +112,7 @@ export default class NewPointPresenter {
       onClick: this.#newEventButtonClickHandler
     });
 
-    if (this.#newEventButtonView) {
-      replace(newEventButtonView, this.#newEventButtonView);
-      remove(this.#newEventButtonView);
-    } else {
-      render(newEventButtonView, this.#rootElement);
-    }
-
+    renderOrReplace(newEventButtonView, this.#newEventButtonView, this.#rootElement);
     this.#newEventButtonView = newEventButtonView;
   }
 
@@ -125,12 +121,13 @@ export default class NewPointPresenter {
    * @param { RoutePointDto } data
    */
   #newPointSubmitHandler = async (data) => {
+    this.setDisabledAttribute(true);
     await this.#routeModelDispatch(
       UserActions.ADD_NEW_POINT,
       ModelActions.MAJOR_UPDATE,
       data
     );
-    this.#renderNewEventButtonView();
+    this.setDisabledAttribute(false);
     document.removeEventListener('keydown', this.#escapeKeydownHandler);
   };
 
@@ -138,7 +135,7 @@ export default class NewPointPresenter {
   * @param { KeyboardEvent } event
   */
   #escapeKeydownHandler = (event) => {
-    if (event.key === 'Escape') {
+    if (isEscapeKey(event)) {
       this.#newEventCancelButtonClickHandler();
     }
   };
@@ -159,21 +156,15 @@ export default class NewPointPresenter {
   #renderNewEventView() {
     const container = this.#listView.element;
     const routePointTemplate = DataTransferObjectService.getNewRoutePointDto();
-    const newEventView = new EditEventFormView({
+    const newEventView = asEventListItemView(new EditEventFormView({
       routePoint: routePointTemplate,
       getDestinations: () => this.#destinationModel.data,
       getOffers: (eventType) => this.#offerModel.getOffersByEventType(eventType),
       onSubmit: this.#newPointSubmitHandler,
       onDelete: this.#newEventCancelButtonClickHandler
-    });
+    }));
 
-    if (this.#newPointView) {
-      replace(newEventView, this.#newPointView);
-      remove(this.#newPointView);
-      this.#newPointView = null;
-    }
-
-    render(newEventView, container, RenderPosition.AFTERBEGIN);
+    renderOrReplace(newEventView, this.#newPointView, container, RenderPosition.AFTERBEGIN);
     this.#newPointView = newEventView;
 
     document.addEventListener('keydown', this.#escapeKeydownHandler);

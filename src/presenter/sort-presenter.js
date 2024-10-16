@@ -1,5 +1,6 @@
-import { remove, render, RenderPosition, replace } from '../framework/render';
+import { remove, RenderPosition } from '../framework/render';
 import { ModelActions } from '../service/actions';
+import { renderOrReplace } from '../utills/view';
 import EventsSortFormView from '../view/events-sort-form-view/events-sort-form-view';
 
 export default class SortPresenter {
@@ -47,13 +48,7 @@ export default class SortPresenter {
       activeSortType: this.#sortModel.sortType
     });
 
-    if (this.#sortView) {
-      replace(newSortView, this.#sortView);
-      remove(this.#sortView);
-    } else {
-      render(newSortView, this.#previousElement, RenderPosition.AFTEREND);
-    }
-
+    renderOrReplace(newSortView, this.#sortView, this.#previousElement, RenderPosition.AFTEREND);
     this.#sortView = newSortView;
   }
 
