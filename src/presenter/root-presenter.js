@@ -11,6 +11,8 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker';
 import { TimeLimits } from '../config/blocker';
 import { renderOrReplace } from '../utills/view';
 
+const DEFAULT_DISPATCH_ERROR_MESSAGE = 'Can\'t apply model action';
+
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');
 
@@ -153,7 +155,7 @@ export default class RootPresenter {
         }
       }
     } catch(err) {
-      throw new Error(err?.message ?? 'Can\'t apply model action');
+      throw new Error(err?.message ?? DEFAULT_DISPATCH_ERROR_MESSAGE);
     } finally {
       blocker.unblock();
     }
