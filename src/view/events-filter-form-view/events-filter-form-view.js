@@ -26,7 +26,7 @@ export default class EventsFilterFormView extends AbstractView {
     this.#onChangeFilterCallback = onFilterChange;
     this.#recordCounts = filtersRecordCountInfo;
     this.#activeFilterType = activeFilterType;
-    this.element.addEventListener('change', this.#onFilterInputChange);
+    this.element.addEventListener('change', this.#filterChangeHandler);
   }
 
   get template() {
@@ -37,7 +37,7 @@ export default class EventsFilterFormView extends AbstractView {
    * Change filter event listener
    * @param { Event } event
    */
-  #onFilterInputChange = (event) => {
+  #filterChangeHandler = (event) => {
     event.preventDefault();
     if (event.target?.checked) {
       const newFilterType = event.target.value;
