@@ -24,14 +24,14 @@ export default class EventsSortFormView extends AbstractView {
     super();
     this.#activeSortingType = activeSortType;
     this.#onSortingChangeCallback = onSortingChangeCallback;
-    this.element.addEventListener('change', this.#onSortingChange);
+    this.element.addEventListener('change', this.#sortingChangeHandler);
   }
 
   /**
    *
    * @param { Event } event
    */
-  #onSortingChange = (event) => {
+  #sortingChangeHandler = (event) => {
     event.preventDefault();
     const newSortType = event.target?.dataset?.sortType;
     if (event.target?.checked && newSortType) {

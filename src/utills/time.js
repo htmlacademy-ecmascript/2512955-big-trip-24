@@ -2,14 +2,14 @@ import dayjsLib from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
+const MINUTES_IN_ONE_HOUR = 60;
+const HOURS_IN_ONE_DAY = 24;
+const MILLISECONDS_IN_ONE_MINUTE = 60000;
+
 dayjsLib.extend(utc);
 dayjsLib.extend(timezone);
 dayjsLib.tz.setDefault('GMT');
 const dayjs = dayjsLib.utc;
-
-const MINUTES_IN_ONE_HOUR = 60;
-const HOURS_IN_ONE_DAY = 24;
-const MILLISECONDS_IN_ONE_MINUTE = 60000;
 
 /**
  * Get TimePartsObject by minutes

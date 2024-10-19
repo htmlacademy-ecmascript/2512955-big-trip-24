@@ -6,13 +6,13 @@
  * @param { (current: TSourceData) => boolean } [compareFn]
  * @returns { TSourceData[] }
  */
-export const updateItem = (source, value, compareFn) => {
+export const updateItem = (sourceValues, updatedItem, compareFn) => {
   /**
    * Default comparer
    * @param { TSourceData } current
    * @returns { boolean }
    */
-  const defaultCompareFunction = (current) => current === value;
+  const defaultCompareFunction = (current) => current === updatedItem;
   const comparer = compareFn ?? defaultCompareFunction;
-  return source.map((current) => comparer(current) ? value : current);
+  return sourceValues.map((current) => comparer(current) ? updatedItem : current);
 };

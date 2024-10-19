@@ -32,8 +32,8 @@ export default class EventInfoView extends AbstractView {
     this.#routePoint = routePoint;
     this.#onRollupButtonClick = onRollupButtonClick;
     this.#onFavoriteButtonClickCallback = onFavoriteButtonClickCallback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onOpenEventButtonClick);
-    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#onFavoriteButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#openEventButtonClickHandler);
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteButtonClickHandler);
   }
 
   get template() {
@@ -46,7 +46,7 @@ export default class EventInfoView extends AbstractView {
    * Open button click handler
    * @param { Event } event
    */
-  #onOpenEventButtonClick = (event) => {
+  #openEventButtonClickHandler = (event) => {
     event.preventDefault();
     this.#onRollupButtonClick();
   };
@@ -55,7 +55,7 @@ export default class EventInfoView extends AbstractView {
    * Open button click handler
    * @param { Event } event
    */
-  #onFavoriteButtonClick = (event) => {
+  #favoriteButtonClickHandler = (event) => {
     event.preventDefault();
     this.#onFavoriteButtonClickCallback()
       .catch(() => this.shake());
